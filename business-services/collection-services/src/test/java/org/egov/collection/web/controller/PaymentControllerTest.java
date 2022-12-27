@@ -1,22 +1,13 @@
 package org.egov.collection.web.controller;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.MissingNode;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-
 import org.egov.collection.model.AuditDetails;
 import org.egov.collection.model.Payment;
 import org.egov.collection.model.PaymentRequest;
 import org.egov.collection.model.enums.InstrumentStatusEnum;
 import org.egov.collection.model.enums.PaymentModeEnum;
 import org.egov.collection.model.enums.PaymentStatusEnum;
-import org.egov.collection.service.MigrationService;
 import org.egov.collection.service.PaymentService;
 import org.egov.collection.service.PaymentWorkflowService;
 import org.egov.collection.web.contract.PaymentWorkflow;
@@ -36,12 +27,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+
+import static org.mockito.Mockito.*;
+
 @ContextConfiguration(classes = {PaymentController.class})
 @ExtendWith(SpringExtension.class)
 class PaymentControllerTest {
-    @MockBean
-    private MigrationService migrationService;
-
     @Autowired
     private PaymentController paymentController;
 
@@ -540,24 +533,6 @@ class PaymentControllerTest {
                         .string(
                                 "{\"ResponseInfo\":{\"apiId\":\"\",\"ver\":\"\",\"ts\":null,\"resMsgId\":\"uief87324\",\"msgId\":\"\",\"status\":\"200"
                                         + " OK\"},\"Payments\":[]}"));
-    }
-
-    @Test
-    void testWorkflow4() throws Exception {
-        doNothing().when(this.migrationService)
-                .migrate((RequestInfo) any(), (Integer) any(), (Integer) any(), (String) any());
-
-        RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
-        requestInfoWrapper.setRequestInfo(new RequestInfo());
-        String content = (new ObjectMapper()).writeValueAsString(requestInfoWrapper);
-        MockHttpServletRequestBuilder postResult = MockMvcRequestBuilders.post("/payments/_migrate");
-        MockHttpServletRequestBuilder requestBuilder = postResult.param("batchSize", String.valueOf(1))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content);
-        MockMvcBuilders.standaloneSetup(this.paymentController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }
 

@@ -335,59 +335,6 @@ class UtilTest {
         assertSame(user, requestInfo.getUserInfo());
     }
 
-
-    @Test
-    void testValidateTenantIdForUserType4() {
-        Util util = new Util();
-        User user = mock(User.class);
-        when(user.getType()).thenReturn("Type");
-        when(user.getRoles()).thenReturn(new ArrayList<>());
-
-        RequestInfo requestInfo = new RequestInfo();
-        requestInfo.setUserInfo(user);
-        util.validateTenantIdForUserType("42", requestInfo);
-        verify(user).getType();
-        verify(user).getRoles();
-    }
-
-
-    @Test
-    void testValidateTenantIdForUserType5() {
-
-        Util util = new Util();
-        User user = mock(User.class);
-        when(user.getType()).thenReturn(Constants.EMPLOYEE_TYPE_CODE);
-        when(user.getRoles()).thenReturn(new ArrayList<>());
-
-        RequestInfo requestInfo = new RequestInfo();
-        requestInfo.setUserInfo(user);
-        util.validateTenantIdForUserType("42", requestInfo);
-        verify(user).getType();
-        verify(user).getRoles();
-    }
-
-
-    @Test
-    void testValidateTenantIdForUserType6() {
-
-        Util util = new Util();
-
-        ArrayList<Role> roleList = new ArrayList<>();
-        roleList.add(new Role());
-        User user = mock(User.class);
-        when(user.getType()).thenReturn("Type");
-        when(user.getRoles()).thenReturn(roleList);
-
-        RequestInfo requestInfo = new RequestInfo();
-        requestInfo.setUserInfo(user);
-        util.validateTenantIdForUserType("42", requestInfo);
-        verify(user).getType();
-        verify(user).getRoles();
-    }
-
-
-
-
     @Test
     void testJsonMerge() {
 

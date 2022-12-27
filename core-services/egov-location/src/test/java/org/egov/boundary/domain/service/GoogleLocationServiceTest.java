@@ -1,11 +1,10 @@
 package org.egov.boundary.domain.service;
 
 import org.egov.boundary.domain.model.Location;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-
-import static junit.framework.TestCase.assertTrue;
 
 public class GoogleLocationServiceTest {
 
@@ -17,7 +16,7 @@ public class GoogleLocationServiceTest {
         double longitude = 81.99713218957186;
         String cityName = "Amalapuram";
         Optional<Location> location = locationService.reverseGeoCode(latitude, longitude);
-        location.ifPresent(location1 -> assertTrue("Correct city is being returned", location1.getCity().equalsIgnoreCase(cityName)));
+        location.ifPresent(location1 -> Assertions.assertTrue(location1.getCity().equalsIgnoreCase(cityName), "Correct city is being returned"));
     }
 
 
@@ -26,6 +25,6 @@ public class GoogleLocationServiceTest {
         double latitude = 1612.56163928157282;
         double longitude = 81.99713218957186;
         Optional<Location> location = locationService.reverseGeoCode(latitude, longitude);
-        assertTrue("Empty is returned for invalid lat lng combination", !location.isPresent());
+        Assertions.assertTrue(!location.isPresent(), "Empty is returned for invalid lat lng combination");
     }
 }

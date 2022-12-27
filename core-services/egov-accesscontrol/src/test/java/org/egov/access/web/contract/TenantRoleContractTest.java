@@ -2,13 +2,12 @@ package org.egov.access.web.contract;
 
 import org.egov.access.web.contract.role.RoleContract;
 import org.egov.access.web.contract.validateaction.TenantRoleContract;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 public class TenantRoleContractTest {
 
@@ -19,7 +18,7 @@ public class TenantRoleContractTest {
 		List<RoleContract> roles = new ArrayList<>(Arrays.asList(role1, role2));
 		TenantRoleContract tenantRole = TenantRoleContract.builder().tenantId("ap.public").roles(roles).build();
 
-		assertEquals("ap.public", tenantRole.getTenantId());
+		Assertions.assertEquals("ap.public", tenantRole.getTenantId());
 		for (RoleContract role : roles) {
 			assert (tenantRole.getRoles().contains(role));
 		}

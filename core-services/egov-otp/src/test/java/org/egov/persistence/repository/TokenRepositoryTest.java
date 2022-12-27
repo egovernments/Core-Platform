@@ -1,102 +1,192 @@
 package org.egov.persistence.repository;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.UUID;
+import java.util.Map;
 
 import org.egov.domain.exception.TokenUpdateException;
 import org.egov.domain.model.Token;
+
 import org.egov.domain.model.TokenSearchCriteria;
-import org.egov.domain.model.Tokens;
 import org.egov.domain.model.ValidateRequest;
-import org.junit.*;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
+import org.egov.web.util.OtpConfiguration;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-public class TokenRepositoryTest {
-
-    @InjectMocks
-    private TokenRepository tokenRepository;
-
-    @Autowired
+@ContextConfiguration(classes = {TokenRepository.class})
+@ExtendWith(SpringExtension.class)
+class TokenRepositoryTest {
+    @MockBean
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    @Before
-    public void before() {
-        tokenRepository = new TokenRepository(namedParameterJdbcTemplate);
+    @MockBean
+    private OtpConfiguration otpConfiguration;
+
+    @Autowired
+    private TokenRepository tokenRepository;
+
+    @Test
+    void testSave() throws DataAccessException {
+        when(namedParameterJdbcTemplate.update((String) any(), (Map<String, Object>) any())).thenReturn(1);
+        LocalDateTime expiryDateTime = LocalDateTime.of(1, 1, 1, 1, 1);
+        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
+        Token token = new Token("42", "Identity", "42", "01234567-89AB-CDEF-FEDC-BA9876543210", expiryDateTime, 1L, 10L,
+                true, Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()));
+
+        assertSame(token, tokenRepository.save(token));
+        verify(namedParameterJdbcTemplate).update((String) any(), (Map<String, Object>) any());
     }
 
     @Test
-    public void test_should_save_entity_token() {
-
-        final Token token = Token.builder().uuid(UUID.randomUUID().toString()).number("99999").identity("someIdentity")
-                .timeToLiveInSeconds(400l).createdDate(new Date()).tenantId("test").build();
-        Token savedToken = tokenRepository.save(token);
-        assertNotNull(savedToken);
-        assertEquals(token.getTenantId(), savedToken.getTenantId());
-        assertEquals(token.getUuid(), savedToken.getUuid());
-
+    void testSave3() throws DataAccessException {
+        LocalDateTime expiryDateTime = LocalDateTime.of(1, 1, 1, 1, 1);
+        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
+        when(namedParameterJdbcTemplate.update((String) any(), (Map<String, Object>) any()))
+                .thenThrow(new TokenUpdateException(new Token("42", "id", "42", "01234567-89AB-CDEF-FEDC-BA9876543210",
+                        expiryDateTime, 1L, 10L, true, Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()))));
+        LocalDateTime expiryDateTime1 = LocalDateTime.of(1, 1, 1, 1, 1);
+        LocalDateTime atStartOfDayResult1 = LocalDate.of(1970, 1, 1).atStartOfDay();
+        assertThrows(TokenUpdateException.class,
+                () -> tokenRepository.save(new Token("42", "Identity", "42", "01234567-89AB-CDEF-FEDC-BA9876543210",
+                        expiryDateTime1, 1L, 10L, true, Date.from(atStartOfDayResult1.atZone(ZoneId.of("UTC")).toInstant()))));
+        verify(namedParameterJdbcTemplate).update((String) any(), (Map<String, Object>) any());
     }
 
     @Test
-    @Ignore
-    @Sql(scripts = {"/sql/clearTokens.sql", "/sql/createTokens.sql"})
-    public void test_should_retrieve_otp_for_given_token_number_and_identity() {
-        ValidateRequest validateRequest = ValidateRequest.builder().otp("token2").identity("identity2")
-                .tenantId("tenant2").build();
+    void testMarkAsValidated() throws DataAccessException {
+        when(namedParameterJdbcTemplate.update((String) any(), (Map<String, Object>) any())).thenReturn(1);
+        LocalDateTime expiryDateTime = LocalDateTime.of(1, 1, 1, 1, 1);
+        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
+        Token token = new Token("42", "Identity", "42", "01234567-89AB-CDEF-FEDC-BA9876543210", expiryDateTime, 1L, 10L,
+                true, Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()));
 
-        final Tokens actualTokens = tokenRepository.findByIdentityAndTenantId(validateRequest);
-
-        assertNotNull(actualTokens);
-        final Token firstToken = actualTokens.getTokens().get(0);
-        assertEquals("id2", firstToken.getUuid());
-        assertEquals("identity2", firstToken.getIdentity());
-        assertEquals("tenant2", firstToken.getTenantId());
-        assertEquals("token2", firstToken.getNumber());
-        assertEquals(Long.valueOf(200), firstToken.getTimeToLiveInSeconds());
-        assertFalse(firstToken.isValidated());
-        assertNotNull(firstToken.getCreatedDate());
+        Token actualMarkAsValidatedResult = tokenRepository.markAsValidated(token);
+        assertSame(token, actualMarkAsValidatedResult);
+        assertTrue(actualMarkAsValidatedResult.isValidated());
+        verify(namedParameterJdbcTemplate).update((String) any(), (Map<String, Object>) any());
     }
 
     @Test
-    @Sql(scripts = {"/sql/clearTokens.sql", "/sql/createTokens.sql"})
-    public void test_should_fetch_token_by_id() {
-        TokenSearchCriteria searchCriteria = new TokenSearchCriteria("id1", "tenant1");
-        final Token token = tokenRepository.findBy(searchCriteria);
-        assertTrue(token.isValidated());
+    void testMarkAsValidated2() throws DataAccessException {
+        when(namedParameterJdbcTemplate.update((String) any(), (Map<String, Object>) any())).thenReturn(0);
+        LocalDateTime expiryDateTime = LocalDateTime.of(1, 1, 1, 1, 1);
+        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
+        assertThrows(TokenUpdateException.class,
+                () -> tokenRepository
+                        .markAsValidated(new Token("42", "Identity", "42", "01234567-89AB-CDEF-FEDC-BA9876543210", expiryDateTime,
+                                1L, 10L, true, Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()))));
+        verify(namedParameterJdbcTemplate).update((String) any(), (Map<String, Object>) any());
     }
 
     @Test
-    @Sql(scripts = {"/sql/clearTokens.sql", "/sql/createTokens.sql"})
-    public void test_should_return_null_when_token_not_present_for_given_id() {
-        TokenSearchCriteria searchCriteria = new TokenSearchCriteria("id5", "tenant6");
-        final Token token = tokenRepository.findBy(searchCriteria);
-        assertNull(token);
+    void testMarkAsValidated4() throws DataAccessException {
+        LocalDateTime expiryDateTime = LocalDateTime.of(1, 1, 1, 1, 1);
+        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
+        when(namedParameterJdbcTemplate.update((String) any(), (Map<String, Object>) any()))
+                .thenThrow(new TokenUpdateException(new Token("42", "id", "42", "01234567-89AB-CDEF-FEDC-BA9876543210",
+                        expiryDateTime, 1L, 10L, true, Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()))));
+        LocalDateTime expiryDateTime1 = LocalDateTime.of(1, 1, 1, 1, 1);
+        LocalDateTime atStartOfDayResult1 = LocalDate.of(1970, 1, 1).atStartOfDay();
+        assertThrows(TokenUpdateException.class,
+                () -> tokenRepository.markAsValidated(
+                        new Token("42", "Identity", "42", "01234567-89AB-CDEF-FEDC-BA9876543210", expiryDateTime1, 1L, 10L, true,
+                                Date.from(atStartOfDayResult1.atZone(ZoneId.of("UTC")).toInstant()))));
+        verify(namedParameterJdbcTemplate).update((String) any(), (Map<String, Object>) any());
     }
 
     @Test
-    @Sql(scripts = {"/sql/clearTokens.sql", "/sql/createTokens.sql"})
-    public void test_should_return_true_when_token_is_updated_to_validated() {
-        final Token token = Token.builder().uuid("id1").build();
-        tokenRepository.markAsValidated(token);
-        assertTrue(token.isValidated());
+    void testFindByIdentityAndTenantId() throws DataAccessException {
+        when(namedParameterJdbcTemplate.query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any()))
+                .thenReturn(new ArrayList<>());
+        assertTrue(tokenRepository.findByIdentityAndTenantId(new ValidateRequest("42", "Otp", "Identity"))
+                .getTokens()
+                .isEmpty());
+        verify(namedParameterJdbcTemplate).query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any());
     }
 
-    @Test(expected = TokenUpdateException.class)
-    public void test_should_return_false_when_token_is_not_updated_successfully() {
-        final Token token = Token.builder().uuid("uuid").build();
-        tokenRepository.markAsValidated(token);
+    @Test
+    void testFindByIdentityAndTenantId3() throws DataAccessException {
+        when(namedParameterJdbcTemplate.query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any()))
+                .thenReturn(new ArrayList<>());
+        assertTrue(tokenRepository
+                .findByIdentityAndTenantId(new ValidateRequest("org.egov.domain.model.ValidateRequest", "Otp", "Identity"))
+                .getTokens()
+                .isEmpty());
+        verify(namedParameterJdbcTemplate).query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any());
+    }
+
+    @Test
+    void testFindByIdentityAndTenantId5() throws DataAccessException {
+        when(namedParameterJdbcTemplate.query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any()))
+                .thenReturn(new ArrayList<>());
+        ValidateRequest validateRequest = mock(ValidateRequest.class);
+        LocalDateTime expiryDateTime = LocalDateTime.of(1, 1, 1, 1, 1);
+        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
+        when(validateRequest.getIdentity())
+                .thenThrow(new TokenUpdateException(new Token("42", "Identity", "42", "01234567-89AB-CDEF-FEDC-BA9876543210",
+                        expiryDateTime, 1L, 10L, true, Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()))));
+        when(validateRequest.getTenantId()).thenReturn("42");
+        assertThrows(TokenUpdateException.class, () -> tokenRepository.findByIdentityAndTenantId(validateRequest));
+        verify(validateRequest).getIdentity();
+        verify(validateRequest).getTenantId();
+    }
+
+    @Test
+    void testFindBy() throws DataAccessException {
+        when(namedParameterJdbcTemplate.query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any()))
+                .thenReturn(new ArrayList<>());
+        assertNull(tokenRepository.findBy(new TokenSearchCriteria("01234567-89AB-CDEF-FEDC-BA9876543210", "42")));
+        verify(namedParameterJdbcTemplate).query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any());
+    }
+
+    @Test
+    void testUpdateTTL() throws DataAccessException {
+        when(namedParameterJdbcTemplate.update((String) any(), (Map<String, Object>) any())).thenReturn(1);
+        when(otpConfiguration.getTtl()).thenReturn(1L);
+        LocalDateTime expiryDateTime = LocalDateTime.of(1, 1, 1, 1, 1);
+        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
+        assertEquals(1,
+                tokenRepository.updateTTL(new Token("42", "Identity", "42", "01234567-89AB-CDEF-FEDC-BA9876543210",
+                        expiryDateTime, 1L, 10L, true, Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()))));
+        verify(namedParameterJdbcTemplate).update((String) any(), (Map<String, Object>) any());
+        verify(otpConfiguration).getTtl();
+    }
+
+    @Test
+    void testUpdateTTL2() throws DataAccessException {
+        when(namedParameterJdbcTemplate.update((String) any(), (Map<String, Object>) any())).thenReturn(1);
+        LocalDateTime expiryDateTime = LocalDateTime.of(1, 1, 1, 1, 1);
+        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
+        when(otpConfiguration.getTtl())
+                .thenThrow(new TokenUpdateException(new Token("42", "id", "42", "01234567-89AB-CDEF-FEDC-BA9876543210",
+                        expiryDateTime, 1L, 10L, true, Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()))));
+        LocalDateTime expiryDateTime1 = LocalDateTime.of(1, 1, 1, 1, 1);
+        LocalDateTime atStartOfDayResult1 = LocalDate.of(1970, 1, 1).atStartOfDay();
+        assertThrows(TokenUpdateException.class,
+                () -> tokenRepository.updateTTL(new Token("42", "Identity", "42", "01234567-89AB-CDEF-FEDC-BA9876543210",
+                        expiryDateTime1, 1L, 10L, true, Date.from(atStartOfDayResult1.atZone(ZoneId.of("UTC")).toInstant()))));
+        verify(otpConfiguration).getTtl();
     }
 }
+

@@ -1,13 +1,11 @@
 package org.egov.access.domain.model;
 
 import org.egov.access.domain.criteria.ActionSearchCriteria;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 public class ActionSearchCriteriaTest {
 
@@ -19,8 +17,8 @@ public class ActionSearchCriteriaTest {
 		ActionSearchCriteria searchCriteria1 = ActionSearchCriteria.builder().roleCodes(roleCodesList).build();
 		ActionSearchCriteria searchCriteria2 = ActionSearchCriteria.builder().roleCodes(roleCodesList).build();
 
-		assertEquals(searchCriteria1, searchCriteria2);
-		assertEquals(searchCriteria1.hashCode(), searchCriteria2.hashCode());
+		Assertions.assertEquals(searchCriteria1, searchCriteria2);
+		Assertions.assertEquals(searchCriteria1.hashCode(), searchCriteria2.hashCode());
 	}
 
 	@Test
@@ -34,7 +32,7 @@ public class ActionSearchCriteriaTest {
 		roleCodesList2.add("TEST");
 		ActionSearchCriteria searchCriteria2 = ActionSearchCriteria.builder().roleCodes(roleCodesList2).build();
 
-		assertNotEquals(searchCriteria1, searchCriteria2);
-		assertNotEquals(searchCriteria1.hashCode(), searchCriteria2.hashCode());
+		Assertions.assertNotEquals(searchCriteria1, searchCriteria2);
+		Assertions.assertNotEquals(searchCriteria1.hashCode(), searchCriteria2.hashCode());
 	}
 }

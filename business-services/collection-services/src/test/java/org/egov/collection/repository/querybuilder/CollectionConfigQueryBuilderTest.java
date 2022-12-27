@@ -1,20 +1,25 @@
 package org.egov.collection.repository.querybuilder;
 
-import org.egov.collection.web.contract.CollectionConfigGetRequest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import org.egov.collection.web.contract.CollectionConfigGetRequest;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ContextConfiguration(classes = {CollectionConfigQueryBuilder.class})
 @ExtendWith(SpringExtension.class)
@@ -27,9 +32,9 @@ class CollectionConfigQueryBuilderTest {
         CollectionConfigGetRequest collectionConfigGetRequest = new CollectionConfigGetRequest();
         ArrayList<Object> objectList = new ArrayList<>();
         assertEquals(
-                "SELECT c.keyname as key, cv.value as value FROM egcl_configuration c JOIN egcl_configurationvalues cv"
-                        + " ON c.id = cv.keyid ORDER BY keyname ASC LIMIT ? OFFSET ?",
-                this.collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
+                "SELECT c.keyname as key, cv.value as value FROM {schema}.egcl_configuration c JOIN egcl_configurationvalues"
+                        + " cv ON c.id = cv.keyid ORDER BY keyname ASC LIMIT ? OFFSET ?",
+                collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
         assertEquals(2, objectList.size());
     }
 
@@ -38,19 +43,20 @@ class CollectionConfigQueryBuilderTest {
         ArrayList<Long> id = new ArrayList<>();
         LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
         CollectionConfigGetRequest collectionConfigGetRequest = new CollectionConfigGetRequest(id,
-                "SELECT c.keyname as key, cv.value as value FROM egcl_configuration c JOIN egcl_configurationvalues cv"
-                        + " ON c.id = cv.keyid",
+                "SELECT c.keyname as key, cv.value as value FROM {schema}.egcl_configuration c JOIN egcl_configurationvalues"
+                        + " cv ON c.id = cv.keyid",
                 Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()),
-                "SELECT c.keyname as key, cv.value as value FROM egcl_configuration c JOIN egcl_configurationvalues cv"
-                        + " ON c.id = cv.keyid",
+                "SELECT c.keyname as key, cv.value as value FROM {schema}.egcl_configuration c JOIN egcl_configurationvalues"
+                        + " cv ON c.id = cv.keyid",
                 "asc", "42", (short) 500, (short) 500);
 
         ArrayList<Object> objectList = new ArrayList<>();
-        assertEquals("SELECT c.keyname as key, cv.value as value FROM egcl_configuration c JOIN egcl_configurationvalues cv"
-                        + " ON c.id = cv.keyid WHERE cv.tenantId = ? AND c.id IN () AND c.keyname = ? AND cv.effectiveFrom = ?"
-                        + " ORDER BY SELECT c.keyname as key, cv.value as value FROM egcl_configuration c JOIN egcl_configurationvalues"
-                        + " cv ON c.id = cv.keyid asc LIMIT ? OFFSET ?",
-                this.collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
+        assertEquals(
+                "SELECT c.keyname as key, cv.value as value FROM {schema}.egcl_configuration c JOIN egcl_configurationvalues"
+                        + " cv ON c.id = cv.keyid WHERE cv.tenantId = ? AND c.id IN () AND c.keyname = ? AND cv.effectiveFrom ="
+                        + " ? ORDER BY SELECT c.keyname as key, cv.value as value FROM {schema}.egcl_configuration c JOIN"
+                        + " egcl_configurationvalues cv ON c.id = cv.keyid asc LIMIT ? OFFSET ?",
+                collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
         assertEquals(5, objectList.size());
     }
 
@@ -69,10 +75,10 @@ class CollectionConfigQueryBuilderTest {
         when(collectionConfigGetRequest.getId()).thenReturn(new ArrayList<>());
         ArrayList<Object> objectList = new ArrayList<>();
         assertEquals(
-                "SELECT c.keyname as key, cv.value as value FROM egcl_configuration c JOIN egcl_configurationvalues cv"
-                        + " ON c.id = cv.keyid WHERE cv.tenantId = ? AND c.id IN () AND c.keyname = ? AND cv.effectiveFrom = ?"
-                        + " ORDER BY Sort By asc LIMIT ? OFFSET ?",
-                this.collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
+                "SELECT c.keyname as key, cv.value as value FROM {schema}.egcl_configuration c JOIN egcl_configurationvalues"
+                        + " cv ON c.id = cv.keyid WHERE cv.tenantId = ? AND c.id IN () AND c.keyname = ? AND cv.effectiveFrom ="
+                        + " ? ORDER BY Sort By asc LIMIT ? OFFSET ?",
+                collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
         verify(collectionConfigGetRequest, atLeast(1)).getPageNumber();
         verify(collectionConfigGetRequest, atLeast(1)).getPageSize();
         verify(collectionConfigGetRequest, atLeast(1)).getName();
@@ -98,9 +104,11 @@ class CollectionConfigQueryBuilderTest {
                 .thenReturn(Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()));
         when(collectionConfigGetRequest.getId()).thenReturn(new ArrayList<>());
         ArrayList<Object> objectList = new ArrayList<>();
-        assertEquals("SELECT c.keyname as key, cv.value as value FROM egcl_configuration c JOIN egcl_configurationvalues cv"
-                + " ON c.id = cv.keyid WHERE cv.tenantId = ? AND c.id IN () AND cv.effectiveFrom = ? ORDER BY Sort By asc"
-                + " LIMIT ? OFFSET ?", this.collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
+        assertEquals(
+                "SELECT c.keyname as key, cv.value as value FROM {schema}.egcl_configuration c JOIN egcl_configurationvalues"
+                        + " cv ON c.id = cv.keyid WHERE cv.tenantId = ? AND c.id IN () AND cv.effectiveFrom = ? ORDER BY Sort By"
+                        + " asc LIMIT ? OFFSET ?",
+                collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
         verify(collectionConfigGetRequest, atLeast(1)).getPageNumber();
         verify(collectionConfigGetRequest, atLeast(1)).getPageSize();
         verify(collectionConfigGetRequest).getName();
@@ -126,9 +134,11 @@ class CollectionConfigQueryBuilderTest {
                 .thenReturn(Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()));
         when(collectionConfigGetRequest.getId()).thenReturn(new ArrayList<>());
         ArrayList<Object> objectList = new ArrayList<>();
-        assertEquals("SELECT c.keyname as key, cv.value as value FROM egcl_configuration c JOIN egcl_configurationvalues cv"
-                + " ON c.id = cv.keyid WHERE c.id IN () AND c.keyname = ? AND cv.effectiveFrom = ? ORDER BY Sort By asc"
-                + " LIMIT ? OFFSET ?", this.collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
+        assertEquals(
+                "SELECT c.keyname as key, cv.value as value FROM {schema}.egcl_configuration c JOIN egcl_configurationvalues"
+                        + " cv ON c.id = cv.keyid WHERE c.id IN () AND c.keyname = ? AND cv.effectiveFrom = ? ORDER BY Sort By"
+                        + " asc LIMIT ? OFFSET ?",
+                collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
         verify(collectionConfigGetRequest, atLeast(1)).getPageNumber();
         verify(collectionConfigGetRequest, atLeast(1)).getPageSize();
         verify(collectionConfigGetRequest, atLeast(1)).getName();
@@ -152,9 +162,11 @@ class CollectionConfigQueryBuilderTest {
         when(collectionConfigGetRequest.getEffectiveFrom()).thenReturn(null);
         when(collectionConfigGetRequest.getId()).thenReturn(new ArrayList<>());
         ArrayList<Object> objectList = new ArrayList<>();
-        assertEquals("SELECT c.keyname as key, cv.value as value FROM egcl_configuration c JOIN egcl_configurationvalues cv"
-                + " ON c.id = cv.keyid WHERE cv.tenantId = ? AND c.id IN () AND c.keyname = ? ORDER BY Sort By asc LIMIT"
-                + " ? OFFSET ?", this.collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
+        assertEquals(
+                "SELECT c.keyname as key, cv.value as value FROM {schema}.egcl_configuration c JOIN egcl_configurationvalues"
+                        + " cv ON c.id = cv.keyid WHERE cv.tenantId = ? AND c.id IN () AND c.keyname = ? ORDER BY Sort By asc"
+                        + " LIMIT ? OFFSET ?",
+                collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
         verify(collectionConfigGetRequest, atLeast(1)).getPageNumber();
         verify(collectionConfigGetRequest, atLeast(1)).getPageSize();
         verify(collectionConfigGetRequest, atLeast(1)).getName();
@@ -169,7 +181,7 @@ class CollectionConfigQueryBuilderTest {
     @Test
     void testGetQuery8() {
         ArrayList<Long> resultLongList = new ArrayList<>();
-        resultLongList.add(4L);
+        resultLongList.add(1L);
         CollectionConfigGetRequest collectionConfigGetRequest = mock(CollectionConfigGetRequest.class);
         when(collectionConfigGetRequest.getPageNumber()).thenReturn((short) 1);
         when(collectionConfigGetRequest.getPageSize()).thenReturn((short) 1);
@@ -183,10 +195,10 @@ class CollectionConfigQueryBuilderTest {
         when(collectionConfigGetRequest.getId()).thenReturn(resultLongList);
         ArrayList<Object> objectList = new ArrayList<>();
         assertEquals(
-                "SELECT c.keyname as key, cv.value as value FROM egcl_configuration c JOIN egcl_configurationvalues cv"
-                        + " ON c.id = cv.keyid WHERE cv.tenantId = ? AND c.id IN (4) AND c.keyname = ? AND cv.effectiveFrom = ?"
-                        + " ORDER BY Sort By asc LIMIT ? OFFSET ?",
-                this.collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
+                "SELECT c.keyname as key, cv.value as value FROM {schema}.egcl_configuration c JOIN egcl_configurationvalues"
+                        + " cv ON c.id = cv.keyid WHERE cv.tenantId = ? AND c.id IN (1) AND c.keyname = ? AND cv.effectiveFrom ="
+                        + " ? ORDER BY Sort By asc LIMIT ? OFFSET ?",
+                collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
         verify(collectionConfigGetRequest, atLeast(1)).getPageNumber();
         verify(collectionConfigGetRequest, atLeast(1)).getPageSize();
         verify(collectionConfigGetRequest, atLeast(1)).getName();
@@ -201,8 +213,8 @@ class CollectionConfigQueryBuilderTest {
     @Test
     void testGetQuery9() {
         ArrayList<Long> resultLongList = new ArrayList<>();
-        resultLongList.add(4L);
-        resultLongList.add(4L);
+        resultLongList.add(1L);
+        resultLongList.add(1L);
         CollectionConfigGetRequest collectionConfigGetRequest = mock(CollectionConfigGetRequest.class);
         when(collectionConfigGetRequest.getPageNumber()).thenReturn((short) 1);
         when(collectionConfigGetRequest.getPageSize()).thenReturn((short) 1);
@@ -216,10 +228,10 @@ class CollectionConfigQueryBuilderTest {
         when(collectionConfigGetRequest.getId()).thenReturn(resultLongList);
         ArrayList<Object> objectList = new ArrayList<>();
         assertEquals(
-                "SELECT c.keyname as key, cv.value as value FROM egcl_configuration c JOIN egcl_configurationvalues cv"
-                        + " ON c.id = cv.keyid WHERE cv.tenantId = ? AND c.id IN (4, 4) AND c.keyname = ? AND cv.effectiveFrom ="
-                        + " ? ORDER BY Sort By asc LIMIT ? OFFSET ?",
-                this.collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
+                "SELECT c.keyname as key, cv.value as value FROM {schema}.egcl_configuration c JOIN egcl_configurationvalues"
+                        + " cv ON c.id = cv.keyid WHERE cv.tenantId = ? AND c.id IN (1, 1) AND c.keyname = ? AND cv.effectiveFrom"
+                        + " = ? ORDER BY Sort By asc LIMIT ? OFFSET ?",
+                collectionConfigQueryBuilder.getQuery(collectionConfigGetRequest, objectList));
         verify(collectionConfigGetRequest, atLeast(1)).getPageNumber();
         verify(collectionConfigGetRequest, atLeast(1)).getPageSize();
         verify(collectionConfigGetRequest, atLeast(1)).getName();

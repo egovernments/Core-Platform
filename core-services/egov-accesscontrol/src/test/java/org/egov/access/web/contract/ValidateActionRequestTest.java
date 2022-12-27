@@ -6,11 +6,10 @@ import org.egov.access.web.contract.validateaction.TenantRoleContract;
 import org.egov.access.web.contract.validateaction.ValidateActionContract;
 import org.egov.access.web.contract.validateaction.ValidateActionRequest;
 import org.egov.common.contract.request.RequestInfo;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
 
 public class ValidateActionRequestTest {
 
@@ -26,8 +25,8 @@ public class ValidateActionRequestTest {
 		ValidateActionRequest validateActionRequest = ValidateActionRequest.builder().requestInfo(requestInfo)
 				.validateAction(validateAction).build();
 
-		assertEquals(requestInfo, validateActionRequest.getRequestInfo());
-		assertEquals(validateAction, validateActionRequest.getValidateAction());
+		Assertions.assertEquals(requestInfo, validateActionRequest.getRequestInfo());
+		Assertions.assertEquals(validateAction, validateActionRequest.getValidateAction());
 	}
 
 	@Test
@@ -43,9 +42,9 @@ public class ValidateActionRequestTest {
 				.validateAction(validateAction).build();
 		ValidateActionCriteria criteria = validateActionRequest.toDomain();
 
-		assertEquals(Arrays.asList("role name"), criteria.getRoleNames());
-		assertEquals("tenantId", criteria.getTenantId());
-		assertEquals("url", criteria.getActionUrl());
+		Assertions.assertEquals(Arrays.asList("role name"), criteria.getRoleNames());
+		Assertions.assertEquals("tenantId", criteria.getTenantId());
+		Assertions.assertEquals("url", criteria.getActionUrl());
 
 	}
 }

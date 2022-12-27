@@ -1,13 +1,19 @@
 package org.egov.collection.repository.querybuilder;
 
-import org.egov.collection.model.AuditDetails;
-import org.egov.collection.web.contract.*;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.egov.collection.model.AuditDetails;
+import org.egov.collection.web.contract.Remittance;
+import org.egov.collection.web.contract.RemittanceDetail;
+import org.egov.collection.web.contract.RemittanceInstrument;
+import org.egov.collection.web.contract.RemittanceReceipt;
+import org.egov.collection.web.contract.RemittanceSearchRequest;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 class RemittanceQueryBuilderTest {
 
@@ -59,7 +65,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -70,14 +77,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.bankaccount in (:bankaccount) AND rem.status = :status AND rem.fund = :fund AND"
-                        + " rem.function = :function AND rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND"
-                        + " rem.referenceDate >= :fromDate AND rem.referenceDate <= :toDate AND rem.voucherHeader = :voucherHeader"
-                        + " AND rem.id IN (:ids) ORDER BY rem.Sort By asc) result) result_offset WHERE offset_ > :offset AND"
-                        + " offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN {schema}"
+                        + ".egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl_remittanceinstrument"
+                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt remRec ON"
+                        + " rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.bankaccount in (:bankaccount) AND"
+                        + " rem.status = :status AND rem.fund = :fund AND rem.function = :function AND rem.reasonForDelay ="
+                        + " :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate >= :fromDate AND rem.referenceDate"
+                        + " <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc)"
+                        + " result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(13, stringObjectMap.size());
@@ -104,7 +111,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -115,14 +123,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.bankaccount in (:bankaccount) AND rem.status = :status AND rem.fund = :fund AND"
-                        + " rem.function = :function AND rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND"
-                        + " rem.referenceDate >= :fromDate AND rem.referenceDate <= :toDate AND rem.voucherHeader = :voucherHeader"
-                        + " AND rem.id IN (:ids) ORDER BY rem.Sort By asc) result) result_offset WHERE offset_ > :offset AND"
-                        + " offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN {schema}"
+                        + ".egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl_remittanceinstrument"
+                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt remRec ON"
+                        + " rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.bankaccount in (:bankaccount) AND"
+                        + " rem.status = :status AND rem.fund = :fund AND rem.function = :function AND rem.reasonForDelay ="
+                        + " :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate >= :fromDate AND rem.referenceDate"
+                        + " <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc)"
+                        + " result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(13, stringObjectMap.size());
@@ -149,7 +157,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -160,13 +169,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.status = :status AND rem.fund = :fund AND rem.function = :function AND rem.reasonForDelay"
-                        + " = :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate >= :fromDate AND rem.referenceDate"
-                        + " <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc)"
-                        + " result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN {schema}"
+                        + ".egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl_remittanceinstrument"
+                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt remRec ON"
+                        + " rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.status = :status AND rem.fund = :fund"
+                        + " AND rem.function = :function AND rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND"
+                        + " rem.referenceDate >= :fromDate AND rem.referenceDate <= :toDate AND rem.voucherHeader = :voucherHeader"
+                        + " AND rem.id IN (:ids) ORDER BY rem.Sort By asc) result) result_offset WHERE offset_ > :offset AND"
+                        + " offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(12, stringObjectMap.size());
@@ -193,7 +203,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -204,13 +215,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.status = :status AND rem.fund = :fund AND rem.function = :function AND rem.reasonForDelay"
-                        + " = :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate >= :fromDate AND rem.referenceDate"
-                        + " <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc)"
-                        + " result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN {schema}"
+                        + ".egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl_remittanceinstrument"
+                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt remRec ON"
+                        + " rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.status = :status AND rem.fund = :fund"
+                        + " AND rem.function = :function AND rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND"
+                        + " rem.referenceDate >= :fromDate AND rem.referenceDate <= :toDate AND rem.voucherHeader = :voucherHeader"
+                        + " AND rem.id IN (:ids) ORDER BY rem.Sort By asc) result) result_offset WHERE offset_ > :offset AND"
+                        + " offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(12, stringObjectMap.size());
@@ -237,7 +249,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -248,13 +261,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.bankaccount in (:bankaccount) AND rem.status = :status AND rem.fund = :fund AND"
-                        + " rem.function = :function AND rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND"
-                        + " rem.referenceDate <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER BY"
-                        + " rem.Sort By asc) result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN {schema}"
+                        + ".egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl_remittanceinstrument"
+                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt remRec ON"
+                        + " rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.bankaccount in (:bankaccount) AND"
+                        + " rem.status = :status AND rem.fund = :fund AND rem.function = :function AND rem.reasonForDelay ="
+                        + " :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate <= :toDate AND rem.voucherHeader ="
+                        + " :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc) result) result_offset WHERE offset_ >"
+                        + " :offset AND offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(12, stringObjectMap.size());
@@ -281,7 +295,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -292,13 +307,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.bankaccount in (:bankaccount) AND rem.status = :status AND rem.fund = :fund AND"
-                        + " rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate >= :fromDate"
-                        + " AND rem.referenceDate <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER"
-                        + " BY rem.Sort By asc) result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN {schema}"
+                        + ".egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl_remittanceinstrument"
+                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt remRec ON"
+                        + " rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.bankaccount in (:bankaccount) AND"
+                        + " rem.status = :status AND rem.fund = :fund AND rem.reasonForDelay = :reasonForDelay AND rem.remarks ="
+                        + " :remarks AND rem.referenceDate >= :fromDate AND rem.referenceDate <= :toDate AND rem.voucherHeader ="
+                        + " :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc) result) result_offset WHERE offset_ >"
+                        + " :offset AND offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(12, stringObjectMap.size());
@@ -325,7 +341,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -336,13 +353,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.bankaccount in (:bankaccount) AND rem.status = :status AND rem.function = :function"
-                        + " AND rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate >= :fromDate"
-                        + " AND rem.referenceDate <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER"
-                        + " BY rem.Sort By asc) result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN {schema}"
+                        + ".egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl_remittanceinstrument"
+                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt remRec ON"
+                        + " rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.bankaccount in (:bankaccount) AND"
+                        + " rem.status = :status AND rem.function = :function AND rem.reasonForDelay = :reasonForDelay AND"
+                        + " rem.remarks = :remarks AND rem.referenceDate >= :fromDate AND rem.referenceDate <= :toDate AND"
+                        + " rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc) result) result_offset"
+                        + " WHERE offset_ > :offset AND offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(12, stringObjectMap.size());
@@ -378,14 +396,15 @@ class RemittanceQueryBuilderTest {
                         + ",remDet.creditAmount as remDet_creditAmount, remDet.debitAmount as remDet_debitAmount,remDet.tenantId"
                         + " as remDet_tenantId, remDet.id as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument"
                         + " as remIsm_instrument, remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId,"
-                        + " remIsm.id as remIsm_id,remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec"
-                        + ".tenantId as remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN"
-                        + " egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument"
-                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance"
-                        + "  WHERE  rem.tenantId =:tenantId AND rem.bankaccount in (:bankaccount) AND rem.status = :status AND"
-                        + " rem.fund = :fund AND rem.function = :function AND rem.reasonForDelay = :reasonForDelay AND rem.remarks"
-                        + " = :remarks AND rem.referenceDate >= :fromDate AND rem.referenceDate <= :toDate AND rem.voucherHeader"
-                        + " = :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc",
+                        + " remIsm.id as remIsm_id,remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt"
+                        + ",remRec.tenantId as remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT"
+                        + " OUTER JOIN {schema}.egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN"
+                        + " {schema}.egcl_remittanceinstrument remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl"
+                        + "_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.bankaccount"
+                        + " in (:bankaccount) AND rem.status = :status AND rem.fund = :fund AND rem.function = :function AND"
+                        + " rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate >= :fromDate"
+                        + " AND rem.referenceDate <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER"
+                        + " BY rem.Sort By asc",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(11, stringObjectMap.size());
@@ -412,7 +431,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -423,13 +443,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.bankaccount in (:bankaccount) AND rem.status = :status AND rem.fund = :fund AND"
-                        + " rem.function = :function AND rem.remarks = :remarks AND rem.referenceDate >= :fromDate AND rem.referenceDate"
-                        + " <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc)"
-                        + " result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN"
+                        + " {schema}.egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl"
+                        + "_remittanceinstrument remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt"
+                        + " remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.bankaccount in (:bankaccount)"
+                        + " AND rem.status = :status AND rem.fund = :fund AND rem.function = :function AND rem.remarks = :remarks"
+                        + " AND rem.referenceDate >= :fromDate AND rem.referenceDate <= :toDate AND rem.voucherHeader ="
+                        + " :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc) result) result_offset WHERE offset_ >"
+                        + " :offset AND offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(12, stringObjectMap.size());
@@ -438,20 +459,21 @@ class RemittanceQueryBuilderTest {
     @Test
     void testGetRemittanceSearchQuery12() {
         ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("Select rem.bankaccount as rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id"
-                + " as rem_id, rem.reasonForDelay as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem"
-                + ".referenceNumber as rem_referenceNumber, rem.remarks as rem_remarks, rem.status as rem_status,rem"
-                + ".voucherHeader as  rem_voucherHeader,rem.createdBy as rem_createdBy, rem.createdDate as rem_createdDate"
-                + ",rem.lastModifiedBy as rem_lastModifiedBy, rem.lastModifiedDate as rem_lastModifiedDate,rem.tenantId"
-                + " as rem_tenantId,remDet.remittance as remDet_remittance, remDet.chartOfAccount as remDet_chartOfAccount"
-                + ",remDet.creditAmount as remDet_creditAmount, remDet.debitAmount as remDet_debitAmount,remDet.tenantId"
-                + " as remDet_tenantId, remDet.id as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument"
-                + " as remIsm_instrument, remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId,"
-                + " remIsm.id as remIsm_id,remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt"
-                + ",remRec.tenantId as remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN"
-                + " egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument"
-                + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec"
-                + ".remittance ");
+        stringList
+                .add("Select rem.bankaccount as rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id"
+                        + " as rem_id, rem.reasonForDelay as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem"
+                        + ".referenceNumber as rem_referenceNumber, rem.remarks as rem_remarks, rem.status as rem_status,rem"
+                        + ".voucherHeader as  rem_voucherHeader,rem.createdBy as rem_createdBy, rem.createdDate as rem_createdDate"
+                        + ",rem.lastModifiedBy as rem_lastModifiedBy, rem.lastModifiedDate as rem_lastModifiedDate,rem.tenantId"
+                        + " as rem_tenantId,remDet.remittance as remDet_remittance, remDet.chartOfAccount as remDet_chartOfAccount"
+                        + ",remDet.creditAmount as remDet_creditAmount, remDet.debitAmount as remDet_debitAmount,remDet.tenantId"
+                        + " as remDet_tenantId, remDet.id as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument"
+                        + " as remIsm_instrument, remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId,"
+                        + " remIsm.id as remIsm_id,remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec"
+                        + ".tenantId as remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN"
+                        + " {schema}.egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl"
+                        + "_remittanceinstrument remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt"
+                        + " remRec ON rem.id=remRec.remittance ");
 
         RemittanceSearchRequest remittanceSearchRequest = new RemittanceSearchRequest();
         remittanceSearchRequest.setBankaccount("3");
@@ -472,7 +494,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -483,14 +506,15 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.referenceNumber IN (:referenceNumbers)   AND rem.bankaccount in (:bankaccount) AND"
-                        + " rem.status = :status AND rem.fund = :fund AND rem.function = :function AND rem.reasonForDelay ="
-                        + " :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate >= :fromDate AND rem.referenceDate"
-                        + " <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc)"
-                        + " result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN {schema}"
+                        + ".egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl_remittanceinstrument"
+                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt remRec ON"
+                        + " rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.referenceNumber IN (:referenceNumbers)"
+                        + "   AND rem.bankaccount in (:bankaccount) AND rem.status = :status AND rem.fund = :fund AND rem.function"
+                        + " = :function AND rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate"
+                        + " >= :fromDate AND rem.referenceDate <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN"
+                        + " (:ids) ORDER BY rem.Sort By asc) result) result_offset WHERE offset_ > :offset AND offset_ <="
+                        + " :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(14, stringObjectMap.size());
@@ -517,7 +541,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -528,13 +553,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.bankaccount in (:bankaccount) AND rem.status = :status AND rem.fund = :fund AND"
-                        + " rem.function = :function AND rem.reasonForDelay = :reasonForDelay AND rem.referenceDate >= :fromDate"
-                        + " AND rem.referenceDate <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER"
-                        + " BY rem.Sort By asc) result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN {schema}"
+                        + ".egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl_remittanceinstrument"
+                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt remRec ON"
+                        + " rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.bankaccount in (:bankaccount) AND"
+                        + " rem.status = :status AND rem.fund = :fund AND rem.function = :function AND rem.reasonForDelay ="
+                        + " :reasonForDelay AND rem.referenceDate >= :fromDate AND rem.referenceDate <= :toDate AND rem.voucherHeader"
+                        + " = :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc) result) result_offset WHERE offset_"
+                        + " > :offset AND offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(12, stringObjectMap.size());
@@ -561,7 +587,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -572,14 +599,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.bankaccount in (:bankaccount) AND rem.status = :status AND rem.fund = :fund AND"
-                        + " rem.function = :function AND rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND"
-                        + " rem.referenceDate >= :fromDate AND rem.referenceDate <= :toDate AND rem.voucherHeader = :voucherHeader"
-                        + " AND rem.id IN (:ids) ORDER BY rem.referenceDate asc) result) result_offset WHERE offset_ > :offset"
-                        + " AND offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN {schema}"
+                        + ".egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl_remittanceinstrument"
+                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt remRec ON"
+                        + " rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.bankaccount in (:bankaccount) AND"
+                        + " rem.status = :status AND rem.fund = :fund AND rem.function = :function AND rem.reasonForDelay ="
+                        + " :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate >= :fromDate AND rem.referenceDate"
+                        + " <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER BY rem.referenceDate"
+                        + " asc) result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(13, stringObjectMap.size());
@@ -606,7 +633,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -617,14 +645,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.bankaccount in (:bankaccount) AND rem.status = :status AND rem.fund = :fund AND"
-                        + " rem.function = :function AND rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND"
-                        + " rem.referenceDate >= :fromDate AND rem.referenceDate <= :toDate AND rem.voucherHeader = :voucherHeader"
-                        + " AND rem.id IN (:ids) ORDER BY rem.Sort By DESC) result) result_offset WHERE offset_ > :offset AND"
-                        + " offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN {schema}"
+                        + ".egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl_remittanceinstrument"
+                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt remRec ON"
+                        + " rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.bankaccount in (:bankaccount) AND"
+                        + " rem.status = :status AND rem.fund = :fund AND rem.function = :function AND rem.reasonForDelay ="
+                        + " :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate >= :fromDate AND rem.referenceDate"
+                        + " <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By DESC)"
+                        + " result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(13, stringObjectMap.size());
@@ -651,7 +679,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -662,13 +691,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.bankaccount in (:bankaccount) AND rem.fund = :fund AND rem.function = :function"
-                        + " AND rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate >= :fromDate"
-                        + " AND rem.referenceDate <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER"
-                        + " BY rem.Sort By asc) result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN {schema}"
+                        + ".egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl_remittanceinstrument"
+                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt remRec ON"
+                        + " rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.bankaccount in (:bankaccount) AND"
+                        + " rem.fund = :fund AND rem.function = :function AND rem.reasonForDelay = :reasonForDelay AND rem.remarks"
+                        + " = :remarks AND rem.referenceDate >= :fromDate AND rem.referenceDate <= :toDate AND rem.voucherHeader"
+                        + " = :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc) result) result_offset WHERE offset_"
+                        + " > :offset AND offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(12, stringObjectMap.size());
@@ -695,7 +725,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -706,13 +737,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE "
-                        + " rem.bankaccount in (:bankaccount) AND rem.status = :status AND rem.fund = :fund AND rem.function ="
-                        + " :function AND rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate"
-                        + " >= :fromDate AND rem.referenceDate <= :toDate AND rem.voucherHeader = :voucherHeader AND rem.id IN"
-                        + " (:ids) ORDER BY rem.Sort By asc) result) result_offset WHERE offset_ > :offset AND offset_ <=" + " :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN {schema}"
+                        + ".egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl_remittanceinstrument"
+                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt remRec ON"
+                        + " rem.id=remRec.remittance  WHERE  rem.bankaccount in (:bankaccount) AND rem.status = :status AND"
+                        + " rem.fund = :fund AND rem.function = :function AND rem.reasonForDelay = :reasonForDelay AND rem.remarks"
+                        + " = :remarks AND rem.referenceDate >= :fromDate AND rem.referenceDate <= :toDate AND rem.voucherHeader"
+                        + " = :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc) result) result_offset WHERE offset_"
+                        + " > :offset AND offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(12, stringObjectMap.size());
@@ -739,7 +771,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(null);
         remittanceSearchRequest.setVoucherHeader("Voucher Header");
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -750,13 +783,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.bankaccount in (:bankaccount) AND rem.status = :status AND rem.fund = :fund AND"
-                        + " rem.function = :function AND rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND"
-                        + " rem.referenceDate >= :fromDate AND rem.voucherHeader = :voucherHeader AND rem.id IN (:ids) ORDER BY"
-                        + " rem.Sort By asc) result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN {schema}"
+                        + ".egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl_remittanceinstrument"
+                        + " remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt remRec ON"
+                        + " rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.bankaccount in (:bankaccount) AND"
+                        + " rem.status = :status AND rem.fund = :fund AND rem.function = :function AND rem.reasonForDelay ="
+                        + " :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate >= :fromDate AND rem.voucherHeader"
+                        + " = :voucherHeader AND rem.id IN (:ids) ORDER BY rem.Sort By asc) result) result_offset WHERE offset_"
+                        + " > :offset AND offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(12, stringObjectMap.size());
     }
@@ -782,7 +816,8 @@ class RemittanceQueryBuilderTest {
         remittanceSearchRequest.setToDate(1L);
         remittanceSearchRequest.setVoucherHeader(null);
         HashMap<String, Object> stringObjectMap = new HashMap<>();
-        assertEquals("SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
+        assertEquals(
+                "SELECT * FROM (SELECT *, DENSE_RANK() OVER (ORDER BY rem_id) offset_ FROM (Select rem.bankaccount as"
                         + " rem_bankaccount,rem.function as rem_function,rem.fund as rem_fund, rem.id as rem_id, rem.reasonForDelay"
                         + " as rem_reasonForDelay, rem.referenceDate as rem_referenceDate,rem.referenceNumber as rem_referenceNumber,"
                         + " rem.remarks as rem_remarks, rem.status as rem_status,rem.voucherHeader as  rem_voucherHeader,rem.createdBy"
@@ -793,13 +828,14 @@ class RemittanceQueryBuilderTest {
                         + " as remDet_id,remIsm.remittance as remIsm_remittance, remIsm.instrument as remIsm_instrument,"
                         + " remIsm.reconciled as remIsm_reconciled,remIsm.tenantId as remIsm_tenantId, remIsm.id as remIsm_id"
                         + ",remRec.remittance as remRec_remittance, remRec.receipt as remRec_receipt,remRec.tenantId as"
-                        + " remRec_tenantId, remRec.id as remRec_id from egcl_remittance rem LEFT OUTER JOIN egcl_remittancedetails"
-                        + " remDet ON rem.id=remDet.remittance LEFT OUTER JOIN egcl_remittanceinstrument remIsm ON rem.id=remIsm"
-                        + ".remittance LEFT OUTER JOIN egcl_remittancereceipt remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId"
-                        + " =:tenantId AND rem.bankaccount in (:bankaccount) AND rem.status = :status AND rem.fund = :fund AND"
-                        + " rem.function = :function AND rem.reasonForDelay = :reasonForDelay AND rem.remarks = :remarks AND"
-                        + " rem.referenceDate >= :fromDate AND rem.referenceDate <= :toDate AND rem.id IN (:ids) ORDER BY rem.Sort"
-                        + " By asc) result) result_offset WHERE offset_ > :offset AND offset_ <= :limit",
+                        + " remRec_tenantId, remRec.id as remRec_id from {schema}.egcl_remittance rem LEFT OUTER JOIN"
+                        + " {schema}.egcl_remittancedetails remDet ON rem.id=remDet.remittance LEFT OUTER JOIN {schema}.egcl"
+                        + "_remittanceinstrument remIsm ON rem.id=remIsm.remittance LEFT OUTER JOIN {schema}.egcl_remittancereceipt"
+                        + " remRec ON rem.id=remRec.remittance  WHERE  rem.tenantId =:tenantId AND rem.bankaccount in (:bankaccount)"
+                        + " AND rem.status = :status AND rem.fund = :fund AND rem.function = :function AND rem.reasonForDelay ="
+                        + " :reasonForDelay AND rem.remarks = :remarks AND rem.referenceDate >= :fromDate AND rem.referenceDate"
+                        + " <= :toDate AND rem.id IN (:ids) ORDER BY rem.Sort By asc) result) result_offset WHERE offset_ >"
+                        + " :offset AND offset_ <= :limit",
                 RemittanceQueryBuilder.getRemittanceSearchQuery(remittanceSearchRequest, stringObjectMap));
         assertEquals(86400001L, remittanceSearchRequest.getToDate().longValue());
         assertEquals(12, stringObjectMap.size());

@@ -3,9 +3,9 @@ package org.egov.access.web.contract;
 import org.egov.access.web.contract.validateaction.ActionValidationContract;
 import org.egov.access.web.contract.validateaction.ValidateActionResponse;
 import org.egov.common.contract.response.ResponseInfo;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ValidateActionResponseTest {
 

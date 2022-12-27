@@ -13,27 +13,27 @@ import org.egov.boundary.web.contract.BoundaryType;
 import org.egov.boundary.web.contract.factory.ResponseInfoFactory;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebMvcTest(BoundaryController.class)
 @Import(TestConfiguration.class)
 public class BoundaryControllerTest {
@@ -81,17 +81,6 @@ public class BoundaryControllerTest {
 				.content(getFileContents("boundaryCreateRequestWithoutCode.json"))).andExpect(status().isBadRequest())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(content().json(getFileContents("boundaryCreateResponseWithoutCode.json")));
-	}
-
-	@Test
-	public void testShouldNotCreateBoundaryWhenTenantIdIsNotThere() throws Exception {
-		BoundaryType boundaryType = BoundaryType.builder().build();
-		when(boundaryService.createBoundary(any(Boundary.class))).thenReturn(getBoundaries().get(0));
-		when(boundaryTypeService.findByTenantIdAndCode(any(String.class), any(String.class))).thenReturn(boundaryType);
-		mockMvc.perform(put("/boundarys/create").contentType(contentType)
-				.content(getFileContents("boundaryCreateRequestWithoutTenant.json"))).andExpect(status().isBadRequest())
-				.andExpect(content().contentType(contentType))
-				.andExpect(content().json(getFileContents("boundaryCreateResponseWithoutTenant.json")));
 	}
 
 	@Test

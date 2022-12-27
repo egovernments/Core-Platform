@@ -1,8 +1,7 @@
 package org.egov.access.domain.model;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class RoleTest {
 
@@ -11,8 +10,8 @@ public class RoleTest {
 		Role role1 = Role.builder().id(1L).name("Employee").code("EMP").description("Employee of an org").build();
 		Role role2 = Role.builder().id(1L).name("Employee").code("EMP").description("Employee of an org").build();
 
-		assertTrue(role1.equals(role2));
-		assertEquals(role1.hashCode(), role2.hashCode());
+		Assertions.assertTrue(role1.equals(role2));
+		Assertions.assertEquals(role1.hashCode(), role2.hashCode());
 	}
 
 	@Test
@@ -21,7 +20,7 @@ public class RoleTest {
 		Role role2 = Role.builder().id(1L).name("Another Employee").code("EMP").description("Employee of an org")
 				.build();
 
-		assertFalse(role1.equals(role2));
-		assertNotEquals(role1.hashCode(), role2.hashCode());
+		Assertions.assertFalse(role1.equals(role2));
+		Assertions.assertNotEquals(role1.hashCode(), role2.hashCode());
 	}
 }

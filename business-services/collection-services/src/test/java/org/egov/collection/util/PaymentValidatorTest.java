@@ -1,9 +1,28 @@
 package org.egov.collection.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.node.MissingNode;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.egov.collection.config.ApplicationProperties;
 import org.egov.collection.model.AuditDetails;
 import org.egov.collection.model.Payment;
+import org.egov.collection.model.PaymentDetail;
 import org.egov.collection.model.PaymentRequest;
 import org.egov.collection.model.PaymentSearchCriteria;
 import org.egov.collection.model.enums.InstrumentStatusEnum;
@@ -13,54 +32,22 @@ import org.egov.collection.producer.CollectionProducer;
 import org.egov.collection.repository.PaymentRepository;
 import org.egov.collection.repository.ServiceRequestRepository;
 import org.egov.collection.service.PaymentWorkflowService;
+import org.egov.common.contract.request.PlainAccessRequest;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.tracer.model.CustomException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class PaymentValidatorTest {
 
     @Test
-    void testValidatePaymentForCreate7() {
+    void testValidatePaymentForCreate11() {
 
         PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
-        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
-        CollectionProducer collectionProducer = new CollectionProducer();
-        PaymentWorkflowService paymentWorkflowService = new PaymentWorkflowService(paymentRepository1,
-                paymentWorkflowValidator, collectionProducer, new ApplicationProperties());
-
-        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository, paymentWorkflowService,
-                new ApplicationProperties(), mock(ServiceRequestRepository.class));
-
-        Payment payment = new Payment();
-        payment.setPaymentMode(PaymentModeEnum.CHEQUE);
-        PaymentRequest paymentRequest = mock(PaymentRequest.class);
-        when(paymentRequest.getRequestInfo()).thenThrow(new CustomException("INVALID_REQUEST_INFO", "An error occurred"));
-        when(paymentRequest.getPayment()).thenReturn(new Payment());
-        doNothing().when(paymentRequest).setPayment((Payment) any());
-        paymentRequest.setPayment(payment);
-        assertThrows(CustomException.class, () -> paymentValidator.validatePaymentForCreate(paymentRequest));
-        verify(paymentRequest, atLeast(1)).getPayment();
-        verify(paymentRequest).getRequestInfo();
-        verify(paymentRequest).setPayment((Payment) any());
-    }
-
-    @Test
-    void testValidatePaymentForCreate9() {
-
-        PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        when(paymentRepository.fetchPayments((PaymentSearchCriteria) any()))
-                .thenReturn(new ArrayList<>());
+        when(paymentRepository.fetchPayments((PaymentSearchCriteria) any())).thenReturn(new ArrayList<>());
         ServiceRequestRepository serviceRequestRepository = mock(ServiceRequestRepository.class);
-        when(serviceRequestRepository.fetchGetResult((String) any()))
-                .thenThrow(new CustomException("INVALID_USER_INFO", "An error occurred"));
+        when(serviceRequestRepository.fetchGetResult((String) any())).thenReturn("Fetch Get Result");
         PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
         PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
         CollectionProducer collectionProducer = new CollectionProducer();
@@ -69,27 +56,140 @@ class PaymentValidatorTest {
 
         PaymentValidator paymentValidator = new PaymentValidator(paymentRepository, paymentWorkflowService,
                 new ApplicationProperties(), serviceRequestRepository);
-
-        Payment payment = new Payment();
-        payment.setPaymentMode(PaymentModeEnum.CHEQUE);
-        PaymentRequest paymentRequest = mock(PaymentRequest.class);
-        when(paymentRequest.getRequestInfo()).thenReturn(new RequestInfo());
         BigDecimal totalDue = BigDecimal.valueOf(42L);
         BigDecimal totalAmountPaid = BigDecimal.valueOf(42L);
         AuditDetails auditDetails = new AuditDetails();
-        MissingNode additionalDetails = MissingNode.getInstance();
-        when(paymentRequest.getPayment()).thenReturn(new Payment("42", "42", totalDue, totalAmountPaid, "42", 4L,
-                PaymentModeEnum.CASH, 4L, "42", InstrumentStatusEnum.APPROVED, "INVALID_USER_INFO", auditDetails,
-                additionalDetails, new ArrayList<>(), "INVALID_USER_INFO", "42", "INVALID_USER_INFO", "42 Main St",
-                "jane.doe@example.org", "42", PaymentStatusEnum.NEW, "42"));
-        doNothing().when(paymentRequest).setPayment((Payment) any());
+
+        Payment payment = new Payment("42", "42", totalDue, totalAmountPaid, "42", 10L, PaymentModeEnum.CASH, 10L, "42",
+                InstrumentStatusEnum.APPROVED, "INVALID_REQUEST_INFO", auditDetails, null, new ArrayList<>(),
+                "INVALID_REQUEST_INFO", "42", "INVALID_REQUEST_INFO", "42 Main St", "jane.doe@example.org", "42",
+                PaymentStatusEnum.NEW, "42");
+        payment.addpaymentDetailsItem(new PaymentDetail());
+        payment.setPaymentMode(PaymentModeEnum.CHEQUE);
+
+        PaymentRequest paymentRequest = new PaymentRequest();
         paymentRequest.setPayment(payment);
         assertThrows(CustomException.class, () -> paymentValidator.validatePaymentForCreate(paymentRequest));
         verify(paymentRepository).fetchPayments((PaymentSearchCriteria) any());
         verify(serviceRequestRepository).fetchGetResult((String) any());
-        verify(paymentRequest, atLeast(1)).getPayment();
-        verify(paymentRequest).getRequestInfo();
-        verify(paymentRequest).setPayment((Payment) any());
+    }
+
+    @Test
+    void testValidatePaymentForCreate12() {
+
+        PaymentRepository paymentRepository = mock(PaymentRepository.class);
+        when(paymentRepository.fetchPayments((PaymentSearchCriteria) any())).thenReturn(new ArrayList<>());
+        ServiceRequestRepository serviceRequestRepository = mock(ServiceRequestRepository.class);
+        when(serviceRequestRepository.fetchGetResult((String) any())).thenReturn("Fetch Get Result");
+        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
+        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
+        CollectionProducer collectionProducer = new CollectionProducer();
+        PaymentWorkflowService paymentWorkflowService = new PaymentWorkflowService(paymentRepository1,
+                paymentWorkflowValidator, collectionProducer, new ApplicationProperties());
+
+        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository, paymentWorkflowService,
+                new ApplicationProperties(), serviceRequestRepository);
+        Payment payment = mock(Payment.class);
+        when(payment.getAdditionalDetails()).thenThrow(new CustomException("INVALID_REQUEST_INFO", "An error occurred"));
+        when(payment.getIfscCode()).thenReturn("Ifsc Code");
+        when(payment.getTenantId()).thenReturn("42");
+        when(payment.getPaymentDetails()).thenReturn(new ArrayList<>());
+        when(payment.addpaymentDetailsItem((PaymentDetail) any())).thenReturn(new Payment());
+        when(payment.getPaymentMode()).thenReturn(PaymentModeEnum.CASH);
+        doNothing().when(payment).setPaymentMode((PaymentModeEnum) any());
+        payment.addpaymentDetailsItem(new PaymentDetail());
+        payment.setPaymentMode(PaymentModeEnum.CHEQUE);
+
+        PaymentRequest paymentRequest = new PaymentRequest();
+        paymentRequest.setPayment(payment);
+        assertThrows(CustomException.class, () -> paymentValidator.validatePaymentForCreate(paymentRequest));
+        verify(paymentRepository).fetchPayments((PaymentSearchCriteria) any());
+        verify(serviceRequestRepository).fetchGetResult((String) any());
+        verify(payment).getAdditionalDetails();
+        verify(payment, atLeast(1)).getIfscCode();
+        verify(payment).getTenantId();
+        verify(payment, atLeast(1)).getPaymentDetails();
+        verify(payment).addpaymentDetailsItem((PaymentDetail) any());
+        verify(payment).getPaymentMode();
+        verify(payment).setPaymentMode((PaymentModeEnum) any());
+    }
+
+    @Test
+    void testValidatePaymentForCreate13() {
+
+        PaymentRepository paymentRepository = mock(PaymentRepository.class);
+        when(paymentRepository.fetchPayments((PaymentSearchCriteria) any())).thenReturn(new ArrayList<>());
+        ServiceRequestRepository serviceRequestRepository = mock(ServiceRequestRepository.class);
+        when(serviceRequestRepository.fetchGetResult((String) any())).thenReturn("Fetch Get Result");
+        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
+        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
+        CollectionProducer collectionProducer = new CollectionProducer();
+        PaymentWorkflowService paymentWorkflowService = new PaymentWorkflowService(paymentRepository1,
+                paymentWorkflowValidator, collectionProducer, new ApplicationProperties());
+
+        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository, paymentWorkflowService,
+                new ApplicationProperties(), serviceRequestRepository);
+        Payment payment = mock(Payment.class);
+        when(payment.getAdditionalDetails()).thenReturn(null);
+        when(payment.getIfscCode()).thenReturn("Ifsc Code");
+        when(payment.getTenantId()).thenReturn("42");
+        when(payment.getPaymentDetails()).thenReturn(new ArrayList<>());
+        when(payment.addpaymentDetailsItem((PaymentDetail) any())).thenReturn(new Payment());
+        when(payment.getPaymentMode()).thenReturn(PaymentModeEnum.CASH);
+        doNothing().when(payment).setPaymentMode((PaymentModeEnum) any());
+        payment.addpaymentDetailsItem(new PaymentDetail());
+        payment.setPaymentMode(PaymentModeEnum.CHEQUE);
+
+        PaymentRequest paymentRequest = new PaymentRequest();
+        paymentRequest.setPayment(payment);
+        assertThrows(CustomException.class, () -> paymentValidator.validatePaymentForCreate(paymentRequest));
+        verify(paymentRepository).fetchPayments((PaymentSearchCriteria) any());
+        verify(serviceRequestRepository).fetchGetResult((String) any());
+        verify(payment).getAdditionalDetails();
+        verify(payment, atLeast(1)).getIfscCode();
+        verify(payment).getTenantId();
+        verify(payment, atLeast(1)).getPaymentDetails();
+        verify(payment).addpaymentDetailsItem((PaymentDetail) any());
+        verify(payment).getPaymentMode();
+        verify(payment).setPaymentMode((PaymentModeEnum) any());
+    }
+
+    @Test
+    void testValidatePaymentForCreate14() {
+
+        PaymentRepository paymentRepository = mock(PaymentRepository.class);
+        when(paymentRepository.fetchPayments((PaymentSearchCriteria) any())).thenReturn(new ArrayList<>());
+        ServiceRequestRepository serviceRequestRepository = mock(ServiceRequestRepository.class);
+        when(serviceRequestRepository.fetchGetResult((String) any())).thenReturn("Fetch Get Result");
+        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
+        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
+        CollectionProducer collectionProducer = new CollectionProducer();
+        PaymentWorkflowService paymentWorkflowService = new PaymentWorkflowService(paymentRepository1,
+                paymentWorkflowValidator, collectionProducer, new ApplicationProperties());
+
+        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository, paymentWorkflowService,
+                new ApplicationProperties(), serviceRequestRepository);
+        Payment payment = mock(Payment.class);
+        when(payment.getAdditionalDetails()).thenReturn(MissingNode.getInstance());
+        when(payment.getIfscCode()).thenReturn(null);
+        when(payment.getTenantId()).thenReturn("42");
+        when(payment.getPaymentDetails()).thenReturn(new ArrayList<>());
+        when(payment.addpaymentDetailsItem((PaymentDetail) any())).thenReturn(new Payment());
+        when(payment.getPaymentMode()).thenReturn(PaymentModeEnum.CASH);
+        doNothing().when(payment).setPaymentMode((PaymentModeEnum) any());
+        payment.addpaymentDetailsItem(new PaymentDetail());
+        payment.setPaymentMode(PaymentModeEnum.CHEQUE);
+
+        PaymentRequest paymentRequest = new PaymentRequest();
+        paymentRequest.setPayment(payment);
+        assertThrows(CustomException.class, () -> paymentValidator.validatePaymentForCreate(paymentRequest));
+        verify(paymentRepository).fetchPayments((PaymentSearchCriteria) any());
+        verify(payment).getIfscCode();
+        verify(payment).getTenantId();
+        verify(payment, atLeast(1)).getPaymentDetails();
+        verify(payment).addpaymentDetailsItem((PaymentDetail) any());
+        verify(payment).getPaymentMode();
+        verify(payment).setPaymentMode((PaymentModeEnum) any());
     }
 
     @Test
@@ -122,8 +222,12 @@ class PaymentValidatorTest {
 
         PaymentValidator paymentValidator = new PaymentValidator(paymentRepository, paymentWorkflowService,
                 new ApplicationProperties(), mock(ServiceRequestRepository.class));
+        PlainAccessRequest plainAccessRequest = new PlainAccessRequest();
+        RequestInfo requestInfo = new RequestInfo("42", "INVALID_USER_INFO", 1L, "INVALID_USER_INFO", "INVALID_USER_INFO",
+                "INVALID_USER_INFO", "42", "ABC123", "42", plainAccessRequest, new User());
+
         HashMap<String, String> stringStringMap = new HashMap<>();
-        paymentValidator.validateUserInfo(null, stringStringMap);
+        paymentValidator.validateUserInfo(requestInfo, stringStringMap);
         assertEquals(1, stringStringMap.size());
     }
 
@@ -139,11 +243,8 @@ class PaymentValidatorTest {
 
         PaymentValidator paymentValidator = new PaymentValidator(paymentRepository, paymentWorkflowService,
                 new ApplicationProperties(), mock(ServiceRequestRepository.class));
-        RequestInfo requestInfo = new RequestInfo("42", "INVALID_USER_INFO", 1L, "INVALID_USER_INFO", "INVALID_USER_INFO",
-                "INVALID_USER_INFO", "42", "ABC123", "42", new User());
-
         HashMap<String, String> stringStringMap = new HashMap<>();
-        paymentValidator.validateUserInfo(requestInfo, stringStringMap);
+        paymentValidator.validateUserInfo(null, stringStringMap);
         assertEquals(1, stringStringMap.size());
     }
 
@@ -160,69 +261,9 @@ class PaymentValidatorTest {
         PaymentValidator paymentValidator = new PaymentValidator(paymentRepository, paymentWorkflowService,
                 new ApplicationProperties(), mock(ServiceRequestRepository.class));
         RequestInfo requestInfo = mock(RequestInfo.class);
-        when(requestInfo.getUserInfo()).thenReturn(new User());
-        HashMap<String, String> stringStringMap = new HashMap<>();
-        paymentValidator.validateUserInfo(requestInfo, stringStringMap);
-        verify(requestInfo, atLeast(1)).getUserInfo();
-        assertEquals(1, stringStringMap.size());
-    }
-
-    @Test
-    void testValidateUserInfo5() {
-
-        PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
-        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
-        CollectionProducer collectionProducer = new CollectionProducer();
-        PaymentWorkflowService paymentWorkflowService = new PaymentWorkflowService(paymentRepository1,
-                paymentWorkflowValidator, collectionProducer, new ApplicationProperties());
-
-        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository, paymentWorkflowService,
-                new ApplicationProperties(), mock(ServiceRequestRepository.class));
-        RequestInfo requestInfo = mock(RequestInfo.class);
-        when(requestInfo.getUserInfo()).thenReturn(new User(123L, "janedoe", "INVALID_USER_ID", "INVALID_USER_ID", "42",
-                "42", new ArrayList<>(), "42", "01234567-89AB-CDEF-FEDC-BA9876543210"));
-        paymentValidator.validateUserInfo(requestInfo, new HashMap<>());
-        verify(requestInfo, atLeast(1)).getUserInfo();
-    }
-
-    @Test
-    void testValidateUserInfo6() {
-
-        PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
-        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
-        CollectionProducer collectionProducer = new CollectionProducer();
-        PaymentWorkflowService paymentWorkflowService = new PaymentWorkflowService(paymentRepository1,
-                paymentWorkflowValidator, collectionProducer, new ApplicationProperties());
-
-        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository, paymentWorkflowService,
-                new ApplicationProperties(), mock(ServiceRequestRepository.class));
-        RequestInfo requestInfo = mock(RequestInfo.class);
-        when(requestInfo.getUserInfo()).thenThrow(new CustomException("INVALID_USER_INFO", "An error occurred"));
+        when(requestInfo.getUserInfo()).thenThrow(new CustomException("Code", "An error occurred"));
         assertThrows(CustomException.class, () -> paymentValidator.validateUserInfo(requestInfo, new HashMap<>()));
         verify(requestInfo).getUserInfo();
-    }
-
-    @Test
-    void testValidateUserInfo7() {
-
-        PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
-        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
-        CollectionProducer collectionProducer = new CollectionProducer();
-        PaymentWorkflowService paymentWorkflowService = new PaymentWorkflowService(paymentRepository1,
-                paymentWorkflowValidator, collectionProducer, new ApplicationProperties());
-
-        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository, paymentWorkflowService,
-                new ApplicationProperties(), mock(ServiceRequestRepository.class));
-        RequestInfo requestInfo = mock(RequestInfo.class);
-        when(requestInfo.getUserInfo()).thenReturn(
-                new User(123L, "janedoe", "INVALID_USER_ID", "INVALID_USER_ID", "42", "42", new ArrayList<>(), "42", ""));
-        HashMap<String, String> stringStringMap = new HashMap<>();
-        paymentValidator.validateUserInfo(requestInfo, stringStringMap);
-        verify(requestInfo, atLeast(1)).getUserInfo();
-        assertEquals(1, stringStringMap.size());
     }
 
     @Test
@@ -230,8 +271,7 @@ class PaymentValidatorTest {
 
         PaymentRepository paymentRepository = mock(PaymentRepository.class);
         ArrayList<Payment> paymentList = new ArrayList<>();
-        when(paymentRepository.fetchPayments((PaymentSearchCriteria) any()))
-                .thenReturn(paymentList);
+        when(paymentRepository.fetchPayments((PaymentSearchCriteria) any())).thenReturn(paymentList);
         PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
         PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
         CollectionProducer collectionProducer = new CollectionProducer();
@@ -252,8 +292,7 @@ class PaymentValidatorTest {
     void testValidateAndEnrichPaymentsForUpdate3() {
 
         PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        when(paymentRepository.fetchPayments((PaymentSearchCriteria) any()))
-                .thenReturn(new ArrayList<>());
+        when(paymentRepository.fetchPayments((PaymentSearchCriteria) any())).thenReturn(new ArrayList<>());
         PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
         PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
         CollectionProducer collectionProducer = new CollectionProducer();
@@ -290,7 +329,6 @@ class PaymentValidatorTest {
         verify(paymentRepository).fetchPayments((PaymentSearchCriteria) any());
     }
 
-
     @Test
     void testValidateAndUpdateSearchRequestFromConfig() {
 
@@ -320,8 +358,13 @@ class PaymentValidatorTest {
 
         PaymentValidator paymentValidator = new PaymentValidator(paymentRepository, paymentWorkflowService,
                 new ApplicationProperties(), mock(ServiceRequestRepository.class));
+        PaymentSearchCriteria paymentSearchCriteria = new PaymentSearchCriteria();
+        PlainAccessRequest plainAccessRequest = new PlainAccessRequest();
         assertThrows(CustomException.class,
-                () -> paymentValidator.validateAndUpdateSearchRequestFromConfig(new PaymentSearchCriteria(), null, null));
+                () -> paymentValidator.validateAndUpdateSearchRequestFromConfig(
+                        paymentSearchCriteria, new RequestInfo("42", "INVALID_USER_INFO", 1L, "INVALID_USER_INFO",
+                                "INVALID_USER_INFO", "INVALID_USER_INFO", "42", "ABC123", "42", plainAccessRequest, new User()),
+                        "Module Name"));
     }
 
     @Test
@@ -336,12 +379,8 @@ class PaymentValidatorTest {
 
         PaymentValidator paymentValidator = new PaymentValidator(paymentRepository, paymentWorkflowService,
                 new ApplicationProperties(), mock(ServiceRequestRepository.class));
-        PaymentSearchCriteria paymentSearchCriteria = new PaymentSearchCriteria();
-        assertThrows(CustomException.class,
-                () -> paymentValidator.validateAndUpdateSearchRequestFromConfig(paymentSearchCriteria,
-                        new RequestInfo("42", "INVALID_USER_INFO", 1L, "INVALID_USER_INFO", "INVALID_USER_INFO",
-                                "INVALID_USER_INFO", "42", "ABC123", "42", new User()),
-                        "Module Name"));
+        assertThrows(CustomException.class, () -> paymentValidator
+                .validateAndUpdateSearchRequestFromConfig(new PaymentSearchCriteria(), null, "Module Name"));
     }
 
     @Test
@@ -358,284 +397,10 @@ class PaymentValidatorTest {
                 new ApplicationProperties(), mock(ServiceRequestRepository.class));
         PaymentSearchCriteria paymentSearchCriteria = new PaymentSearchCriteria();
         RequestInfo requestInfo = mock(RequestInfo.class);
-        when(requestInfo.getUserInfo()).thenReturn(new User());
-        assertThrows(CustomException.class, () -> paymentValidator
-                .validateAndUpdateSearchRequestFromConfig(paymentSearchCriteria, requestInfo, "Module Name"));
-        verify(requestInfo, atLeast(1)).getUserInfo();
-    }
-
-    @Test
-    void testValidateAndUpdateSearchRequestFromConfig7() {
-
-        PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
-        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
-        CollectionProducer collectionProducer = new CollectionProducer();
-        PaymentWorkflowService paymentWorkflowService = new PaymentWorkflowService(paymentRepository1,
-                paymentWorkflowValidator, collectionProducer, new ApplicationProperties());
-
-        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository, paymentWorkflowService,
-                new ApplicationProperties(), mock(ServiceRequestRepository.class));
-        PaymentSearchCriteria paymentSearchCriteria = new PaymentSearchCriteria();
-        RequestInfo requestInfo = mock(RequestInfo.class);
-        when(requestInfo.getUserInfo()).thenThrow(new CustomException("INVALID_USER_INFO", "An error occurred"));
+        when(requestInfo.getUserInfo()).thenThrow(new CustomException("Code", "An error occurred"));
         assertThrows(CustomException.class, () -> paymentValidator
                 .validateAndUpdateSearchRequestFromConfig(paymentSearchCriteria, requestInfo, "Module Name"));
         verify(requestInfo).getUserInfo();
-    }
-
-    @Test
-    void testValidateAndUpdateSearchRequestFromConfig8() {
-
-        ApplicationProperties applicationProperties = new ApplicationProperties();
-        applicationProperties.setSearchIgnoreStatus(new ArrayList<>());
-        PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
-        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
-        CollectionProducer collectionProducer = new CollectionProducer();
-        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository,
-                new PaymentWorkflowService(paymentRepository1, paymentWorkflowValidator, collectionProducer,
-                        new ApplicationProperties()),
-                applicationProperties, mock(ServiceRequestRepository.class));
-        PaymentSearchCriteria paymentSearchCriteria = new PaymentSearchCriteria();
-        RequestInfo requestInfo = mock(RequestInfo.class);
-        when(requestInfo.getUserInfo()).thenReturn(new User(123L, "janedoe", "INVALID_USER_ID", "INVALID_USER_ID", "42",
-                "42", new ArrayList<>(), "42", "01234567-89AB-CDEF-FEDC-BA9876543210"));
-        paymentValidator.validateAndUpdateSearchRequestFromConfig(paymentSearchCriteria, requestInfo, "Module Name");
-        verify(requestInfo, atLeast(1)).getUserInfo();
-        assertEquals(1, paymentSearchCriteria.getBusinessServices().size());
-    }
-
-
-    @Test
-    void testValidateAndUpdateSearchRequestFromConfig12() {
-
-        ApplicationProperties applicationProperties = new ApplicationProperties();
-        applicationProperties.setSearchIgnoreStatus(new ArrayList<>());
-        PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
-        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
-        CollectionProducer collectionProducer = new CollectionProducer();
-        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository,
-                new PaymentWorkflowService(paymentRepository1, paymentWorkflowValidator, collectionProducer,
-                        new ApplicationProperties()),
-                applicationProperties, mock(ServiceRequestRepository.class));
-        PaymentSearchCriteria paymentSearchCriteria = mock(PaymentSearchCriteria.class);
-        when(paymentSearchCriteria.getBusinessServices()).thenReturn(new HashSet<>());
-        doNothing().when(paymentSearchCriteria).setBusinessServices((Set<String>) any());
-        when(paymentSearchCriteria.getReceiptNumbers()).thenReturn(new HashSet<>());
-        RequestInfo requestInfo = mock(RequestInfo.class);
-        when(requestInfo.getUserInfo()).thenReturn(new User(123L, "janedoe", "INVALID_USER_ID", "INVALID_USER_ID", "42",
-                "42", new ArrayList<>(), "42", "01234567-89AB-CDEF-FEDC-BA9876543210"));
-        paymentValidator.validateAndUpdateSearchRequestFromConfig(paymentSearchCriteria, requestInfo, "Module Name");
-        verify(paymentSearchCriteria).getBusinessServices();
-        verify(paymentSearchCriteria).getReceiptNumbers();
-        verify(paymentSearchCriteria).setBusinessServices((Set<String>) any());
-        verify(requestInfo, atLeast(1)).getUserInfo();
-    }
-
-    @Test
-    void testValidateAndUpdateSearchRequestFromConfig13() {
-
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("EMPLOYEE");
-
-        ApplicationProperties applicationProperties = new ApplicationProperties();
-        applicationProperties.setSearchIgnoreStatus(stringList);
-        PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
-        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
-        CollectionProducer collectionProducer = new CollectionProducer();
-        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository,
-                new PaymentWorkflowService(paymentRepository1, paymentWorkflowValidator, collectionProducer,
-                        new ApplicationProperties()),
-                applicationProperties, mock(ServiceRequestRepository.class));
-        PaymentSearchCriteria paymentSearchCriteria = mock(PaymentSearchCriteria.class);
-        when(paymentSearchCriteria.getStatus()).thenReturn(new HashSet<>());
-        doNothing().when(paymentSearchCriteria).setStatus((Set<String>) any());
-        when(paymentSearchCriteria.getBusinessServices()).thenReturn(new HashSet<>());
-        doNothing().when(paymentSearchCriteria).setBusinessServices((Set<String>) any());
-        when(paymentSearchCriteria.getReceiptNumbers()).thenReturn(new HashSet<>());
-        RequestInfo requestInfo = mock(RequestInfo.class);
-        when(requestInfo.getUserInfo()).thenReturn(new User(123L, "janedoe", "INVALID_USER_ID", "INVALID_USER_ID", "42",
-                "42", new ArrayList<>(), "42", "01234567-89AB-CDEF-FEDC-BA9876543210"));
-        paymentValidator.validateAndUpdateSearchRequestFromConfig(paymentSearchCriteria, requestInfo, "Module Name");
-        verify(paymentSearchCriteria).getBusinessServices();
-        verify(paymentSearchCriteria).getReceiptNumbers();
-        verify(paymentSearchCriteria).getStatus();
-        verify(paymentSearchCriteria).setBusinessServices((Set<String>) any());
-        verify(paymentSearchCriteria).setStatus((Set<String>) any());
-        verify(requestInfo, atLeast(1)).getUserInfo();
-    }
-
-    @Test
-    void testValidateAndUpdateSearchRequestFromConfig14() {
-
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("EMPLOYEE");
-
-        ApplicationProperties applicationProperties = new ApplicationProperties();
-        applicationProperties.setSearchIgnoreStatus(stringList);
-        PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
-        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
-        CollectionProducer collectionProducer = new CollectionProducer();
-        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository,
-                new PaymentWorkflowService(paymentRepository1, paymentWorkflowValidator, collectionProducer,
-                        new ApplicationProperties()),
-                applicationProperties, mock(ServiceRequestRepository.class));
-
-        HashSet<String> stringSet = new HashSet<>();
-        stringSet.add("EMPLOYEE");
-        PaymentSearchCriteria paymentSearchCriteria = mock(PaymentSearchCriteria.class);
-        when(paymentSearchCriteria.getStatus()).thenReturn(stringSet);
-        doNothing().when(paymentSearchCriteria).setStatus((Set<String>) any());
-        when(paymentSearchCriteria.getBusinessServices()).thenReturn(new HashSet<>());
-        doNothing().when(paymentSearchCriteria).setBusinessServices((Set<String>) any());
-        when(paymentSearchCriteria.getReceiptNumbers()).thenReturn(new HashSet<>());
-        RequestInfo requestInfo = mock(RequestInfo.class);
-        when(requestInfo.getUserInfo()).thenReturn(new User(123L, "janedoe", "INVALID_USER_ID", "INVALID_USER_ID", "42",
-                "42", new ArrayList<>(), "42", "01234567-89AB-CDEF-FEDC-BA9876543210"));
-        paymentValidator.validateAndUpdateSearchRequestFromConfig(paymentSearchCriteria, requestInfo, "Module Name");
-        verify(paymentSearchCriteria).getBusinessServices();
-        verify(paymentSearchCriteria).getReceiptNumbers();
-        verify(paymentSearchCriteria).getStatus();
-        verify(paymentSearchCriteria).setBusinessServices((Set<String>) any());
-        verify(requestInfo, atLeast(1)).getUserInfo();
-    }
-
-    @Test
-    void testValidateAndUpdateSearchRequestFromConfig15() {
-
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("EMPLOYEE");
-
-        ApplicationProperties applicationProperties = new ApplicationProperties();
-        applicationProperties.setSearchIgnoreStatus(stringList);
-        PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
-        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
-        CollectionProducer collectionProducer = new CollectionProducer();
-        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository,
-                new PaymentWorkflowService(paymentRepository1, paymentWorkflowValidator, collectionProducer,
-                        new ApplicationProperties()),
-                applicationProperties, mock(ServiceRequestRepository.class));
-
-        HashSet<String> stringSet = new HashSet<>();
-        stringSet.add("EMPLOYEE");
-        PaymentSearchCriteria paymentSearchCriteria = mock(PaymentSearchCriteria.class);
-        when(paymentSearchCriteria.getStatus()).thenReturn(new HashSet<>());
-        doNothing().when(paymentSearchCriteria).setStatus((Set<String>) any());
-        when(paymentSearchCriteria.getBusinessServices()).thenReturn(stringSet);
-        doNothing().when(paymentSearchCriteria).setBusinessServices((Set<String>) any());
-        when(paymentSearchCriteria.getReceiptNumbers()).thenReturn(new HashSet<>());
-        RequestInfo requestInfo = mock(RequestInfo.class);
-        when(requestInfo.getUserInfo()).thenReturn(new User(123L, "janedoe", "INVALID_USER_ID", "INVALID_USER_ID", "42",
-                "42", new ArrayList<>(), "42", "01234567-89AB-CDEF-FEDC-BA9876543210"));
-        paymentValidator.validateAndUpdateSearchRequestFromConfig(paymentSearchCriteria, requestInfo, "Module Name");
-        verify(paymentSearchCriteria, atLeast(1)).getBusinessServices();
-        verify(paymentSearchCriteria).getReceiptNumbers();
-        verify(paymentSearchCriteria).getStatus();
-        verify(paymentSearchCriteria).setStatus((Set<String>) any());
-        verify(requestInfo, atLeast(1)).getUserInfo();
-    }
-
-    @Test
-    void testValidateAndUpdateSearchRequestFromConfig16() {
-
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("EMPLOYEE");
-
-        ApplicationProperties applicationProperties = new ApplicationProperties();
-        applicationProperties.setSearchIgnoreStatus(stringList);
-        PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
-        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
-        CollectionProducer collectionProducer = new CollectionProducer();
-        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository,
-                new PaymentWorkflowService(paymentRepository1, paymentWorkflowValidator, collectionProducer,
-                        new ApplicationProperties()),
-                applicationProperties, mock(ServiceRequestRepository.class));
-
-        HashSet<String> stringSet = new HashSet<>();
-        stringSet.add("EMPLOYEE");
-        PaymentSearchCriteria paymentSearchCriteria = mock(PaymentSearchCriteria.class);
-        when(paymentSearchCriteria.getStatus()).thenReturn(new HashSet<>());
-        doNothing().when(paymentSearchCriteria).setStatus((Set<String>) any());
-        when(paymentSearchCriteria.getBusinessServices()).thenReturn(new HashSet<>());
-        doNothing().when(paymentSearchCriteria).setBusinessServices((Set<String>) any());
-        when(paymentSearchCriteria.getReceiptNumbers()).thenReturn(stringSet);
-        RequestInfo requestInfo = mock(RequestInfo.class);
-        when(requestInfo.getUserInfo()).thenReturn(new User(123L, "janedoe", "INVALID_USER_ID", "INVALID_USER_ID", "42",
-                "42", new ArrayList<>(), "42", "01234567-89AB-CDEF-FEDC-BA9876543210"));
-        paymentValidator.validateAndUpdateSearchRequestFromConfig(paymentSearchCriteria, requestInfo, "Module Name");
-        verify(paymentSearchCriteria).getBusinessServices();
-        verify(paymentSearchCriteria).getReceiptNumbers();
-        verify(paymentSearchCriteria).setBusinessServices((Set<String>) any());
-        verify(requestInfo, atLeast(1)).getUserInfo();
-    }
-
-    @Test
-    void testValidateAndUpdateSearchRequestFromConfig18() {
-
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("EMPLOYEE");
-
-        ApplicationProperties applicationProperties = new ApplicationProperties();
-        applicationProperties.setSearchIgnoreStatus(stringList);
-        PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
-        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
-        CollectionProducer collectionProducer = new CollectionProducer();
-        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository,
-                new PaymentWorkflowService(paymentRepository1, paymentWorkflowValidator, collectionProducer,
-                        new ApplicationProperties()),
-                applicationProperties, mock(ServiceRequestRepository.class));
-        PaymentSearchCriteria paymentSearchCriteria = mock(PaymentSearchCriteria.class);
-        when(paymentSearchCriteria.getStatus()).thenReturn(new HashSet<>());
-        doNothing().when(paymentSearchCriteria).setStatus((Set<String>) any());
-        when(paymentSearchCriteria.getBusinessServices()).thenReturn(new HashSet<>());
-        doNothing().when(paymentSearchCriteria).setBusinessServices((Set<String>) any());
-        when(paymentSearchCriteria.getReceiptNumbers()).thenReturn(new HashSet<>());
-        RequestInfo requestInfo = mock(RequestInfo.class);
-        when(requestInfo.getUserInfo()).thenReturn(
-                new User(123L, "janedoe", "INVALID_USER_ID", "INVALID_USER_ID", "42", "42", new ArrayList<>(), "42", ""));
-        assertThrows(CustomException.class, () -> paymentValidator
-                .validateAndUpdateSearchRequestFromConfig(paymentSearchCriteria, requestInfo, "Module Name"));
-        verify(requestInfo, atLeast(1)).getUserInfo();
-    }
-
-    @Test
-    void testValidateAndUpdateSearchRequestFromConfig19() {
-
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("EMPLOYEE");
-
-        ApplicationProperties applicationProperties = new ApplicationProperties();
-        applicationProperties.setSearchIgnoreStatus(stringList);
-        PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        PaymentRepository paymentRepository1 = mock(PaymentRepository.class);
-        PaymentWorkflowValidator paymentWorkflowValidator = new PaymentWorkflowValidator();
-        CollectionProducer collectionProducer = new CollectionProducer();
-        PaymentValidator paymentValidator = new PaymentValidator(paymentRepository,
-                new PaymentWorkflowService(paymentRepository1, paymentWorkflowValidator, collectionProducer,
-                        new ApplicationProperties()),
-                applicationProperties, mock(ServiceRequestRepository.class));
-        PaymentSearchCriteria paymentSearchCriteria = mock(PaymentSearchCriteria.class);
-        when(paymentSearchCriteria.getStatus()).thenThrow(new CustomException("EMPLOYEE", "An error occurred"));
-        doThrow(new CustomException("EMPLOYEE", "An error occurred")).when(paymentSearchCriteria)
-                .setStatus((Set<String>) any());
-        when(paymentSearchCriteria.getBusinessServices()).thenReturn(new HashSet<>());
-        doNothing().when(paymentSearchCriteria).setBusinessServices((Set<String>) any());
-        when(paymentSearchCriteria.getReceiptNumbers()).thenReturn(new HashSet<>());
-        RequestInfo requestInfo = mock(RequestInfo.class);
-        when(requestInfo.getUserInfo()).thenReturn(new User(123L, "janedoe", "INVALID_USER_ID", "INVALID_USER_ID", "42",
-                "42", new ArrayList<>(), "42", "01234567-89AB-CDEF-FEDC-BA9876543210"));
-        assertThrows(CustomException.class, () -> paymentValidator
-                .validateAndUpdateSearchRequestFromConfig(paymentSearchCriteria, requestInfo, "Module Name"));
-        verify(paymentSearchCriteria).getReceiptNumbers();
-        verify(paymentSearchCriteria).getStatus();
-        verify(requestInfo, atLeast(1)).getUserInfo();
     }
 }
 

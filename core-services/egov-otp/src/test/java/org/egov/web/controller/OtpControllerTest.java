@@ -1,206 +1,146 @@
 package org.egov.web.controller;
 
-import org.egov.Resources;
-import org.egov.domain.exception.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+
 import org.egov.domain.model.Token;
 import org.egov.domain.model.TokenRequest;
 import org.egov.domain.model.TokenSearchCriteria;
 import org.egov.domain.model.ValidateRequest;
 import org.egov.domain.service.TokenService;
-import org.egov.persistence.repository.*;
-import org.egov.web.util.*;
-import org.junit.*;
-import org.junit.runner.RunWith;
-import org.mockito.*;
-import org.mockito.runners.*;
+import org.egov.web.contract.OtpRequest;
+import org.egov.web.contract.OtpValidateRequest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.bcrypt.*;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.time.*;
-
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@RunWith(MockitoJUnitRunner.class)
-@WebMvcTest(OtpController.class)
-@Ignore
-public class OtpControllerTest {
-
-    private final static String IDENTITY = "identity";
-    private final static String TENANT_ID = "tenantId";
-    private static final String OTP_NUMBER = "otpNumber";
-
+@ContextConfiguration(classes = {OtpController.class})
+@ExtendWith(SpringExtension.class)
+class OtpControllerTest {
     @Autowired
-    private MockMvc mockMvc;
-
-    private Resources resources = new Resources();
+    private OtpController otpController;
 
     @MockBean
-    @InjectMocks
     private TokenService tokenService;
 
-    @Mock
-    private TokenRepository tokenRepository;
+    @Test
+    void testCreateOtp() throws Exception {
+        LocalDateTime expiryDateTime = LocalDateTime.of(1, 1, 1, 1, 1);
+        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
+        when(tokenService.create((TokenRequest) any()))
+                .thenReturn(new Token("42", "Identity", "42", "01234567-89AB-CDEF-FEDC-BA9876543210", expiryDateTime, 1L, 10L,
+                        true, Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant())));
+        MockHttpServletRequestBuilder contentTypeResult = MockMvcRequestBuilders.post("/v1/_create")
+                .contentType(MediaType.APPLICATION_JSON);
 
-    @Before
-    public void before() {
-        this.tokenService = new TokenService(
-                tokenRepository,
-                new BCryptPasswordEncoder(),
-                new OtpConfiguration(90,6, true)
-        );
+        ObjectMapper objectMapper = new ObjectMapper();
+        MockHttpServletRequestBuilder requestBuilder = contentTypeResult
+                .content(objectMapper.writeValueAsString(new OtpRequest()));
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(otpController).build().perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"responseInfo\":null,\"otp\":{\"otp\":\"42\",\"identity\":\"Identity\",\"tenantId\":\"42\",\"UUID\":\"01234567-89AB"
+                                        + "-CDEF-FEDC-BA9876543210\",\"isValidationSuccessful\":true}}"));
     }
 
     @Test
-    public void test_should_return_token() throws Exception {
+    void testSearch() throws Exception {
+        LocalDateTime expiryDateTime = LocalDateTime.of(1, 1, 1, 1, 1);
+        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
+        when(tokenService.search((TokenSearchCriteria) any()))
+                .thenReturn(new Token("42", "Identity", "42", "01234567-89AB-CDEF-FEDC-BA9876543210", expiryDateTime, 1L, 10L,
+                        true, Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant())));
+        MockHttpServletRequestBuilder contentTypeResult = MockMvcRequestBuilders.post("/v1/_search")
+                .contentType(MediaType.APPLICATION_JSON);
 
-        final Token token = Token.builder()
-                .uuid("uuid")
-                .identity(IDENTITY)
-                .tenantId(TENANT_ID)
-                .number("randomNumber")
-                .build();
-        final TokenRequest tokenRequest = new TokenRequest(IDENTITY, TENANT_ID);
-        when(tokenService.create(tokenRequest)).thenReturn(token);
-
-        mockMvc.perform(post("/v1/_create").contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(resources.getFileContents("createOtpRequest.json")))
-                .andExpect(status().isCreated())
-                .andExpect(content().json(resources.getFileContents("createOtpResponse.json")));
+        ObjectMapper objectMapper = new ObjectMapper();
+        MockHttpServletRequestBuilder requestBuilder = contentTypeResult
+                .content(objectMapper.writeValueAsString(new OtpRequest()));
+        MockMvcBuilders.standaloneSetup(otpController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"responseInfo\":null,\"otp\":{\"otp\":\"42\",\"identity\":\"Identity\",\"tenantId\":\"42\",\"UUID\":\"01234567-89AB"
+                                        + "-CDEF-FEDC-BA9876543210\",\"isValidationSuccessful\":true}}"));
     }
 
     @Test
-    public void test_should_return_token_for_given_search_criteria() throws Exception {
-        final Token token = Token.builder()
-                .uuid("uuid")
-                .identity(IDENTITY)
-                .tenantId(TENANT_ID)
-                .number("randomNumber")
-                .build();
-        final String uuid = "uuid";
-        when(tokenService.search(new TokenSearchCriteria(uuid, TENANT_ID))).thenReturn(token);
+    void testSearch2() throws Exception {
+        when(tokenService.search((TokenSearchCriteria) any())).thenReturn(null);
+        MockHttpServletRequestBuilder contentTypeResult = MockMvcRequestBuilders.post("/v1/_search")
+                .contentType(MediaType.APPLICATION_JSON);
 
-        mockMvc.perform(post("/v1/_search").contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(resources.getFileContents("otpSearchRequest.json")))
-                .andExpect(status().isOk())
-                .andExpect(content().json(resources.getFileContents("createOtpResponse.json")));
+        ObjectMapper objectMapper = new ObjectMapper();
+        MockHttpServletRequestBuilder requestBuilder = contentTypeResult
+                .content(objectMapper.writeValueAsString(new OtpRequest()));
+        MockMvcBuilders.standaloneSetup(otpController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("{\"responseInfo\":null,\"otp\":null}"));
     }
 
     @Test
-    public void test_should_return_success_response_when_validation_is_successful() throws Exception {
-        final ValidateRequest validateRequest = ValidateRequest.builder()
-                .otp(OTP_NUMBER)
-                .tenantId(TENANT_ID)
-                .identity(IDENTITY)
-                .build();
-        final Token token = Token.builder()
-                .validated(true)
-                .tenantId(TENANT_ID)
-                .number(OTP_NUMBER)
-                .identity(IDENTITY)
-                .uuid("uuid")
-                .build();
-        when(tokenService.validate(validateRequest)).thenReturn(token);
+    void testCreateOtp2() throws Exception {
+        when(tokenService.create((TokenRequest) any())).thenReturn(null);
+        MockHttpServletRequestBuilder contentTypeResult = MockMvcRequestBuilders.post("/v1/_create")
+                .contentType(MediaType.APPLICATION_JSON);
 
-        mockMvc.perform(post("/v1/_validate").contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(resources.getFileContents("validateOtpRequest.json")))
-                .andExpect(status().isOk())
-                .andExpect(content().json(resources.getFileContents("successOtpValidationResponse.json")));
+        ObjectMapper objectMapper = new ObjectMapper();
+        MockHttpServletRequestBuilder requestBuilder = contentTypeResult
+                .content(objectMapper.writeValueAsString(new OtpRequest()));
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(otpController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("{\"responseInfo\":null,\"otp\":null}"));
     }
 
     @Test
-    public void test_should_return_error_response_when_otp_validation_request_is_not_valid() throws Exception {
-        final ValidateRequest validateRequest = ValidateRequest.builder()
-                .otp("")
-                .tenantId("")
-                .identity("")
-                .build();
-        when(tokenService.validate(validateRequest))
-                .thenThrow(new InvalidTokenValidateRequestException(validateRequest));
+    void testValidateOtp() throws Exception {
+        LocalDateTime expiryDateTime = LocalDateTime.of(1, 1, 1, 1, 1);
+        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
+        when(tokenService.validate((ValidateRequest) any()))
+                .thenReturn(new Token("42", "Identity", "42", "01234567-89AB-CDEF-FEDC-BA9876543210", expiryDateTime, 1L, 10L,
+                        true, Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant())));
+        MockHttpServletRequestBuilder contentTypeResult = MockMvcRequestBuilders.post("/v1/_validate")
+                .contentType(MediaType.APPLICATION_JSON);
 
-        mockMvc.perform(post("/v1/_validate").contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(resources.getFileContents("invalidOtpValidationRequest.json")))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(resources.getFileContents("errorOtpValidationResponse.json")));
+        ObjectMapper objectMapper = new ObjectMapper();
+        MockHttpServletRequestBuilder requestBuilder = contentTypeResult
+                .content(objectMapper.writeValueAsString(new OtpValidateRequest()));
+        MockMvcBuilders.standaloneSetup(otpController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"responseInfo\":null,\"otp\":{\"otp\":null,\"identity\":\"Identity\",\"tenantId\":\"42\",\"UUID\":\"01234567-89AB"
+                                        + "-CDEF-FEDC-BA9876543210\",\"isValidationSuccessful\":true}}"));
     }
-
-    @Test
-    public void test_should_return_error_response_when_otp_update_is_not_successful() throws Exception {
-        final ValidateRequest validateRequest = ValidateRequest.builder()
-                .otp(OTP_NUMBER)
-                .tenantId(TENANT_ID)
-                .identity(IDENTITY)
-                .build();
-        final Token token = Token.builder().build();
-        when(tokenService.validate(validateRequest))
-                .thenThrow(new TokenUpdateException(token));
-
-        mockMvc.perform(post("/v1/_validate").contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(resources.getFileContents("validateOtpRequest.json")))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(resources.getFileContents("otpUpdateErrorResponse.json")));
-    }
-
-    @Test
-    public void test_should_return_error_response_when_otp_validate_is_not_successful() throws Exception {
-        final ValidateRequest validateRequest = ValidateRequest.builder()
-                .otp(OTP_NUMBER)
-                .tenantId(TENANT_ID)
-                .identity(IDENTITY)
-                .build();
-        when(tokenService.validate(validateRequest))
-                .thenThrow(new TokenValidationFailureException());
-
-        mockMvc.perform(post("/v1/_validate").contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(resources.getFileContents("validateOtpRequest.json")))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(resources.getFileContents("otpValidateFailureErrorResponse.json")));
-    }
-
-    @Test
-    public void test_should_return_error_response_when_otp_validate() throws Exception {
-        final ValidateRequest validateRequest = ValidateRequest.builder()
-                .otp(OTP_NUMBER)
-                .tenantId(TENANT_ID)
-                .identity(IDENTITY)
-                .build();
-        when(tokenService.validate(validateRequest))
-                .thenThrow(new TokenAlreadyUsedException());
-
-        mockMvc.perform(post("/v1/_validate").contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(resources.getFileContents("validateOtpRequest.json")))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void test_should_return_error_response_when_token_request_is_not_valid() throws Exception {
-        final TokenRequest tokenRequest = new TokenRequest("", "");
-        when(tokenService.create(tokenRequest)).thenThrow(new InvalidTokenRequestException(tokenRequest));
-
-        mockMvc.perform(post("/v1/_create").contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(resources.getFileContents("invalidOtpRequest.json")))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(resources.getFileContents("invalidOtpResponse.json")));
-    }
-
-    @Test
-    public void test_should_return_error_response_when_search_is_not_valid() throws Exception {
-        final TokenSearchCriteria searchCriteria = new TokenSearchCriteria("", "");
-        final InvalidTokenSearchCriteriaException exception =
-                new InvalidTokenSearchCriteriaException(searchCriteria);
-        when(tokenService.search(searchCriteria)).thenThrow(exception);
-
-        mockMvc.perform(post("/v1/_search").contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(resources.getFileContents("invalidOtpSearchRequest.json")))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(resources.getFileContents("invalidOtpSearchResponse.json")));
-    }
-
 }
+

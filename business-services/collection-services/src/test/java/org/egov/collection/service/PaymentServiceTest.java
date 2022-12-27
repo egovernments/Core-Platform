@@ -1,8 +1,32 @@
 package org.egov.collection.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.node.MissingNode;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+
 import org.egov.collection.config.ApplicationProperties;
-import org.egov.collection.model.*;
+import org.egov.collection.model.AuditDetails;
+import org.egov.collection.model.Payment;
+import org.egov.collection.model.PaymentDetail;
+import org.egov.collection.model.PaymentRequest;
+import org.egov.collection.model.PaymentSearchCriteria;
 import org.egov.collection.model.enums.InstrumentStatusEnum;
 import org.egov.collection.model.enums.PaymentModeEnum;
 import org.egov.collection.model.enums.PaymentStatusEnum;
@@ -16,16 +40,8 @@ import org.egov.collection.web.contract.Bill;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.tracer.model.CustomException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class PaymentServiceTest {
 
@@ -191,7 +207,8 @@ class PaymentServiceTest {
 
         assertEquals(3L,
                 (new PaymentService(apportionerService, paymentEnricher, applicationProperties, userService, paymentValidator,
-                        paymentRepository, new CollectionProducer())).getpaymentcountForBusiness("foo", "foo").longValue());
+                        paymentRepository, new CollectionProducer())).getpaymentcountForBusiness("42", "Business Service")
+                        .longValue());
         verify(paymentRepository).getPaymentsCount((String) any(), (String) any());
     }
 
@@ -217,7 +234,8 @@ class PaymentServiceTest {
 
         assertThrows(CustomException.class,
                 () -> (new PaymentService(apportionerService, paymentEnricher, applicationProperties, userService,
-                        paymentValidator, paymentRepository, new CollectionProducer())).getpaymentcountForBusiness("foo", "foo"));
+                        paymentValidator, paymentRepository, new CollectionProducer())).getpaymentcountForBusiness("42",
+                        "Business Service"));
         verify(paymentRepository).getPaymentsCount((String) any(), (String) any());
     }
 
@@ -321,7 +339,7 @@ class PaymentServiceTest {
         PaymentRepository paymentRepository = mock(PaymentRepository.class);
         doNothing().when(paymentRepository).savePayment((Payment) any());
         CollectionProducer collectionProducer = mock(CollectionProducer.class);
-        doNothing().when(collectionProducer).producer((String) any(), (Object) any());
+        doNothing().when(collectionProducer).push((String) any(), (String) any(), (Object) any());
         ApplicationProperties applicationProperties = new ApplicationProperties();
         PaymentService paymentService = new PaymentService(apportionerService, paymentEnricher, applicationProperties,
                 new UserService(), paymentValidator, paymentRepository, collectionProducer);
@@ -337,8 +355,8 @@ class PaymentServiceTest {
         AuditDetails auditDetails = new AuditDetails();
         MissingNode additionalDetails = MissingNode.getInstance();
         Payment payment = new Payment("42", "42", totalDue, totalAmountPaid, "42", 1L, PaymentModeEnum.CASH, 1L, "42",
-                InstrumentStatusEnum.APPROVED, "Ifsc Code", auditDetails, additionalDetails, new ArrayList<>(), "Paid By", "42",
-                "Payer Name", "42 Main St", "jane.doe@example.org", "42", PaymentStatusEnum.NEW, "42");
+                InstrumentStatusEnum.APPROVED, "Ifsc Code", auditDetails, additionalDetails, new ArrayList<>(), "Paid By",
+                "42", "Payer Name", "42 Main St", "jane.doe@example.org", "42", PaymentStatusEnum.NEW, "42");
 
         paymentRequest.setPayment(payment);
         Payment actualCreatePaymentResult = paymentService.createPayment(paymentRequest);
@@ -350,7 +368,7 @@ class PaymentServiceTest {
         verify(paymentEnricher).enrichPaymentPreValidate((PaymentRequest) any());
         verify(paymentValidator).validatePaymentForCreate((PaymentRequest) any());
         verify(paymentRepository).savePayment((Payment) any());
-        verify(collectionProducer).producer((String) any(), (Object) any());
+        verify(collectionProducer).push((String) any(), (String) any(), (Object) any());
     }
 
     @Test
@@ -367,7 +385,7 @@ class PaymentServiceTest {
         PaymentRepository paymentRepository = mock(PaymentRepository.class);
         doNothing().when(paymentRepository).savePayment((Payment) any());
         CollectionProducer collectionProducer = mock(CollectionProducer.class);
-        doNothing().when(collectionProducer).producer((String) any(), (Object) any());
+        doNothing().when(collectionProducer).push((String) any(), (String) any(), (Object) any());
         ApplicationProperties applicationProperties = new ApplicationProperties();
         PaymentService paymentService = new PaymentService(apportionerService, paymentEnricher, applicationProperties,
                 new UserService(), paymentValidator, paymentRepository, collectionProducer);
@@ -382,8 +400,8 @@ class PaymentServiceTest {
         AuditDetails auditDetails = new AuditDetails();
         MissingNode additionalDetails = MissingNode.getInstance();
         Payment payment = new Payment("42", "42", totalDue, totalAmountPaid, "42", 1L, PaymentModeEnum.CASH, 1L, "42",
-                InstrumentStatusEnum.APPROVED, "Ifsc Code", auditDetails, additionalDetails, new ArrayList<>(), "Paid By", "42",
-                "Payer Name", "42 Main St", "jane.doe@example.org", "42", PaymentStatusEnum.NEW, "42");
+                InstrumentStatusEnum.APPROVED, "Ifsc Code", auditDetails, additionalDetails, new ArrayList<>(), "Paid By",
+                "42", "Payer Name", "42 Main St", "jane.doe@example.org", "42", PaymentStatusEnum.NEW, "42");
 
         paymentRequest.setPayment(payment);
         assertSame(payment, paymentService.createPayment(paymentRequest));
@@ -393,7 +411,7 @@ class PaymentServiceTest {
         verify(paymentEnricher).enrichPaymentPreValidate((PaymentRequest) any());
         verify(paymentValidator).validatePaymentForCreate((PaymentRequest) any());
         verify(paymentRepository).savePayment((Payment) any());
-        verify(collectionProducer).producer((String) any(), (Object) any());
+        verify(collectionProducer).push((String) any(), (String) any(), (Object) any());
     }
 
     @Test
@@ -498,10 +516,10 @@ class PaymentServiceTest {
     void testUpdatePayment3() {
 
         PaymentValidator paymentValidator = mock(PaymentValidator.class);
-        when(paymentValidator.validateAndEnrichPaymentsForUpdate((List<Payment>) any(),
-                (RequestInfo) any())).thenReturn(new ArrayList<>());
+        when(paymentValidator.validateAndEnrichPaymentsForUpdate((List<Payment>) any(), (RequestInfo) any()))
+                .thenReturn(new ArrayList<>());
         PaymentRepository paymentRepository = mock(PaymentRepository.class);
-        doThrow(new CustomException("Pushing to Queue FAILED! ", "An error occurred")).when(paymentRepository)
+        doThrow(new CustomException("Code", "An error occurred")).when(paymentRepository)
                 .updatePayment((List<Payment>) any());
         ApportionerService apportionerService = new ApportionerService();
         PaymentEnricher paymentEnricher = new PaymentEnricher();
@@ -510,34 +528,41 @@ class PaymentServiceTest {
         PaymentService paymentService = new PaymentService(apportionerService, paymentEnricher, applicationProperties,
                 userService, paymentValidator, paymentRepository, new CollectionProducer());
         assertThrows(CustomException.class, () -> paymentService.updatePayment(new PaymentRequest()));
-        verify(paymentValidator).validateAndEnrichPaymentsForUpdate((List<Payment>) any(),
-                (RequestInfo) any());
+        verify(paymentValidator).validateAndEnrichPaymentsForUpdate((List<Payment>) any(), (RequestInfo) any());
         verify(paymentRepository).updatePayment((List<Payment>) any());
     }
 
     @Test
-    void testUpdatePayment5() {
+    void testUpdatePayment6() {
 
         PaymentValidator paymentValidator = mock(PaymentValidator.class);
         ArrayList<Payment> paymentList = new ArrayList<>();
-        when(paymentValidator.validateAndEnrichPaymentsForUpdate((List<Payment>) any(),
-                (RequestInfo) any())).thenReturn(paymentList);
+        when(paymentValidator.validateAndEnrichPaymentsForUpdate((List<Payment>) any(), (RequestInfo) any()))
+                .thenReturn(paymentList);
         PaymentRepository paymentRepository = mock(PaymentRepository.class);
         doNothing().when(paymentRepository).updatePayment((List<Payment>) any());
         CollectionProducer collectionProducer = mock(CollectionProducer.class);
-        doNothing().when(collectionProducer).producer((String) any(), (Object) any());
+        doNothing().when(collectionProducer).push((String) any(), (String) any(), (Object) any());
         ApportionerService apportionerService = new ApportionerService();
         PaymentEnricher paymentEnricher = new PaymentEnricher();
         ApplicationProperties applicationProperties = new ApplicationProperties();
         PaymentService paymentService = new PaymentService(apportionerService, paymentEnricher, applicationProperties,
                 new UserService(), paymentValidator, paymentRepository, collectionProducer);
-        List<Payment> actualUpdatePaymentResult = paymentService.updatePayment(new PaymentRequest());
+
+        PaymentRequest paymentRequest = new PaymentRequest();
+        BigDecimal totalDue = BigDecimal.valueOf(42L);
+        BigDecimal totalAmountPaid = BigDecimal.valueOf(42L);
+        AuditDetails auditDetails = new AuditDetails();
+        MissingNode additionalDetails = MissingNode.getInstance();
+        paymentRequest.setPayment(new Payment("42", "42", totalDue, totalAmountPaid, "42", 2L, PaymentModeEnum.CASH, 2L,
+                "42", InstrumentStatusEnum.APPROVED, "Ifsc Code", auditDetails, additionalDetails, new ArrayList<>(),
+                "Paid By", "42", "Payer Name", "42 Main St", "jane.doe@example.org", "42", PaymentStatusEnum.NEW, "42"));
+        List<Payment> actualUpdatePaymentResult = paymentService.updatePayment(paymentRequest);
         assertSame(paymentList, actualUpdatePaymentResult);
         assertTrue(actualUpdatePaymentResult.isEmpty());
-        verify(paymentValidator).validateAndEnrichPaymentsForUpdate((List<Payment>) any(),
-                (RequestInfo) any());
+        verify(paymentValidator).validateAndEnrichPaymentsForUpdate((List<Payment>) any(), (RequestInfo) any());
         verify(paymentRepository).updatePayment((List<Payment>) any());
-        verify(collectionProducer).producer((String) any(), (Object) any());
+        verify(collectionProducer).push((String) any(), (String) any(), (Object) any());
     }
 
     @Test
@@ -715,8 +740,8 @@ class PaymentServiceTest {
         HashSet<String> paymentModes = new HashSet<>();
         ArrayList<String> payerIds = new ArrayList<>();
         HashSet<String> consumerCodes = new HashSet<>();
-        List<Payment> actualPlainSearchResult = paymentService
-                .plainSearch(new PaymentSearchCriteria(ids, billIds, "42", tenantIds, receiptNumbers, status, instrumentStatus,
+        List<Payment> actualPlainSearchResult = paymentService.plainSearch(
+                new PaymentSearchCriteria(ids, billIds, "42", tenantIds, receiptNumbers, status, instrumentStatus,
                         paymentModes, payerIds, consumerCodes, new HashSet<>(), "42", "42", 3L, 3L, 2, 3, true));
         assertSame(paymentList, actualPlainSearchResult);
         assertTrue(actualPlainSearchResult.isEmpty());

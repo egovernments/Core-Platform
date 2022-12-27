@@ -1,11 +1,10 @@
 package org.egov.access.persistence.repository.querybuilder;
 
 import org.egov.access.domain.criteria.ValidateActionCriteria;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
 
 public class ValidateActionQueryBuilderTest {
 
@@ -19,7 +18,7 @@ public class ValidateActionQueryBuilderTest {
 				+ " JOIN eg_ms_role AS r ON ra.rolecode = r.code" + " JOIN eg_action AS a on ra.actionid = a.id"
 				+ " WHERE r.name in ('r1','r2')" + " AND ra.tenantid = 'tenantid'"
 				+ " AND a.url = 'url') AS \"exists\"";
-		assertEquals(expectedQuery, builder.build());
+		Assertions.assertEquals(expectedQuery, builder.build());
 	}
 
 }

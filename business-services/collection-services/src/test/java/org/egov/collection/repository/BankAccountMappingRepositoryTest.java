@@ -1,26 +1,35 @@
 package org.egov.collection.repository;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.egov.collection.model.BankAccountServiceMapping;
 import org.egov.collection.model.BankAccountServiceMappingSearchCriteria;
+
 import org.egov.collection.repository.querybuilder.BankAccountServiceQueryBuilder;
+import org.egov.common.utils.MultiStateInstanceUtil;
+import org.egov.tracer.model.CustomException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
-
-@ContextConfiguration(classes = {BankAccountMappingRepository.class})
+@ContextConfiguration(classes = {BankAccountMappingRepository.class, MultiStateInstanceUtil.class})
 @ExtendWith(SpringExtension.class)
 class BankAccountMappingRepositoryTest {
     @Autowired
@@ -37,56 +46,130 @@ class BankAccountMappingRepositoryTest {
 
     @Test
     void testPersistBankAccountServiceMapping() {
-        when(this.namedParameterJdbcTemplate.batchUpdate((String) any(), (java.util.Map<String, ?>[]) any()))
+        when(bankAccountServiceQueryBuilder.insertBankAccountServiceDetailsQuery()).thenReturn("3");
+        when(namedParameterJdbcTemplate.batchUpdate((String) any(), (Map<String, ?>[]) any()))
                 .thenReturn(new int[]{1, 1, 1, 1});
-        when(this.bankAccountServiceQueryBuilder.insertBankAccountServiceDetailsQuery()).thenReturn("3");
-        this.bankAccountMappingRepository.persistBankAccountServiceMapping(new ArrayList<>());
-        verify(this.namedParameterJdbcTemplate).batchUpdate((String) any(), (java.util.Map<String, ?>[]) any());
-        verify(this.bankAccountServiceQueryBuilder).insertBankAccountServiceDetailsQuery();
+        bankAccountMappingRepository.persistBankAccountServiceMapping(new ArrayList<>());
+        verify(bankAccountServiceQueryBuilder).insertBankAccountServiceDetailsQuery();
+        verify(namedParameterJdbcTemplate).batchUpdate((String) any(), (Map<String, ?>[]) any());
     }
 
     @Test
     void testPersistBankAccountServiceMapping2() {
-        when(this.namedParameterJdbcTemplate.batchUpdate((String) any(), (java.util.Map<String, ?>[]) any()))
-                .thenReturn(new int[]{1, 1, 1, 1});
-        when(this.bankAccountServiceQueryBuilder.insertBankAccountServiceDetailsQuery()).thenReturn("3");
-
-        ArrayList<BankAccountServiceMapping> bankAccountServiceMappingList = new ArrayList<>();
-        bankAccountServiceMappingList.add(new BankAccountServiceMapping());
-        this.bankAccountMappingRepository.persistBankAccountServiceMapping(bankAccountServiceMappingList);
-        verify(this.namedParameterJdbcTemplate).batchUpdate((String) any(), (java.util.Map<String, ?>[]) any());
-        verify(this.bankAccountServiceQueryBuilder).insertBankAccountServiceDetailsQuery();
+        when(bankAccountServiceQueryBuilder.insertBankAccountServiceDetailsQuery()).thenReturn("3");
+        when(namedParameterJdbcTemplate.batchUpdate((String) any(), (Map<String, ?>[]) any()))
+                .thenThrow(new CustomException("Create BankAccount Service Mapping Repository::", "An error occurred"));
+        bankAccountMappingRepository.persistBankAccountServiceMapping(new ArrayList<>());
+        verify(bankAccountServiceQueryBuilder).insertBankAccountServiceDetailsQuery();
+        verify(namedParameterJdbcTemplate).batchUpdate((String) any(), (Map<String, ?>[]) any());
     }
 
     @Test
-    void testSearchBankAccountServicemapping() throws DataAccessException {
+    void testPersistBankAccountServiceMapping3() {
+        when(bankAccountServiceQueryBuilder.insertBankAccountServiceDetailsQuery()).thenReturn("3");
+        when(namedParameterJdbcTemplate.batchUpdate((String) any(), (Map<String, ?>[]) any()))
+                .thenReturn(new int[]{1, 1, 1, 1});
+
+        ArrayList<BankAccountServiceMapping> bankAccountServiceMappingList = new ArrayList<>();
+        bankAccountServiceMappingList.add(new BankAccountServiceMapping());
+        bankAccountMappingRepository.persistBankAccountServiceMapping(bankAccountServiceMappingList);
+        verify(bankAccountServiceQueryBuilder).insertBankAccountServiceDetailsQuery();
+        verify(namedParameterJdbcTemplate).batchUpdate((String) any(), (Map<String, ?>[]) any());
+    }
+
+    @Test
+    void testSearchBankAccountServicemapping2() throws DataAccessException {
+        when(bankAccountServiceQueryBuilder.BankAccountServiceMappingSearchQuery(
+                (BankAccountServiceMappingSearchCriteria) any(), (Map<String, Object>) any())).thenReturn("3");
         ArrayList<Object> objectList = new ArrayList<>();
-        when(this.namedParameterJdbcTemplate.query((String) any(), (java.util.Map<String, ?>) any(),
-                (org.springframework.jdbc.core.RowMapper<Object>) any())).thenReturn(objectList);
-        when(this.bankAccountServiceQueryBuilder.BankAccountServiceMappingSearchQuery(
-                (BankAccountServiceMappingSearchCriteria) any(), (java.util.Map<String, Object>) any())).thenReturn("3");
-        List<BankAccountServiceMapping> actualSearchBankAccountServicemappingResult = this.bankAccountMappingRepository
-                .searchBankAccountServicemapping(new BankAccountServiceMappingSearchCriteria());
+        when(namedParameterJdbcTemplate.query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any()))
+                .thenReturn(objectList);
+
+        BankAccountServiceMappingSearchCriteria bankAccountServiceMappingSearchCriteria = new BankAccountServiceMappingSearchCriteria();
+        bankAccountServiceMappingSearchCriteria.setTenantId("42");
+        List<BankAccountServiceMapping> actualSearchBankAccountServicemappingResult = bankAccountMappingRepository
+                .searchBankAccountServicemapping(bankAccountServiceMappingSearchCriteria);
         assertSame(objectList, actualSearchBankAccountServicemappingResult);
         assertTrue(actualSearchBankAccountServicemappingResult.isEmpty());
-        verify(this.namedParameterJdbcTemplate).query((String) any(), (java.util.Map<String, ?>) any(),
-                (org.springframework.jdbc.core.RowMapper<Object>) any());
-        verify(this.bankAccountServiceQueryBuilder).BankAccountServiceMappingSearchQuery(
-                (BankAccountServiceMappingSearchCriteria) any(), (java.util.Map<String, Object>) any());
+        verify(bankAccountServiceQueryBuilder).BankAccountServiceMappingSearchQuery(
+                (BankAccountServiceMappingSearchCriteria) any(), (Map<String, Object>) any());
+        verify(namedParameterJdbcTemplate).query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any());
+    }
+
+    @Test
+    void testSearchBankAccountServicemapping3() throws DataAccessException {
+        when(bankAccountServiceQueryBuilder.BankAccountServiceMappingSearchQuery(
+                (BankAccountServiceMappingSearchCriteria) any(), (Map<String, Object>) any())).thenReturn("{schema}.");
+        ArrayList<Object> objectList = new ArrayList<>();
+        when(namedParameterJdbcTemplate.query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any()))
+                .thenReturn(objectList);
+
+        BankAccountServiceMappingSearchCriteria bankAccountServiceMappingSearchCriteria = new BankAccountServiceMappingSearchCriteria();
+        bankAccountServiceMappingSearchCriteria.setTenantId("42");
+        List<BankAccountServiceMapping> actualSearchBankAccountServicemappingResult = bankAccountMappingRepository
+                .searchBankAccountServicemapping(bankAccountServiceMappingSearchCriteria);
+        assertSame(objectList, actualSearchBankAccountServicemappingResult);
+        assertTrue(actualSearchBankAccountServicemappingResult.isEmpty());
+        verify(bankAccountServiceQueryBuilder).BankAccountServiceMappingSearchQuery(
+                (BankAccountServiceMappingSearchCriteria) any(), (Map<String, Object>) any());
+        verify(namedParameterJdbcTemplate).query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any());
+    }
+
+    @Test
+    void testSearchBankAccountServicemapping4() throws DataAccessException {
+        when(bankAccountServiceQueryBuilder.BankAccountServiceMappingSearchQuery(
+                (BankAccountServiceMappingSearchCriteria) any(), (Map<String, Object>) any())).thenReturn("3");
+        ArrayList<Object> objectList = new ArrayList<>();
+        when(namedParameterJdbcTemplate.query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any()))
+                .thenReturn(objectList);
+
+        BankAccountServiceMappingSearchCriteria bankAccountServiceMappingSearchCriteria = new BankAccountServiceMappingSearchCriteria();
+        bankAccountServiceMappingSearchCriteria.setTenantId("{schema}.");
+        List<BankAccountServiceMapping> actualSearchBankAccountServicemappingResult = bankAccountMappingRepository
+                .searchBankAccountServicemapping(bankAccountServiceMappingSearchCriteria);
+        assertSame(objectList, actualSearchBankAccountServicemappingResult);
+        assertTrue(actualSearchBankAccountServicemappingResult.isEmpty());
+        verify(bankAccountServiceQueryBuilder).BankAccountServiceMappingSearchQuery(
+                (BankAccountServiceMappingSearchCriteria) any(), (Map<String, Object>) any());
+        verify(namedParameterJdbcTemplate).query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any());
+    }
+
+    @Test
+    void testSearchBankAccountServicemapping5() throws DataAccessException {
+        when(bankAccountServiceQueryBuilder.BankAccountServiceMappingSearchQuery(
+                (BankAccountServiceMappingSearchCriteria) any(), (Map<String, Object>) any())).thenReturn("3");
+        when(namedParameterJdbcTemplate.query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any()))
+                .thenThrow(new CustomException("{schema}.", "An error occurred"));
+
+        BankAccountServiceMappingSearchCriteria bankAccountServiceMappingSearchCriteria = new BankAccountServiceMappingSearchCriteria();
+        bankAccountServiceMappingSearchCriteria.setTenantId("42");
+        assertTrue(bankAccountMappingRepository.searchBankAccountServicemapping(bankAccountServiceMappingSearchCriteria)
+                .isEmpty());
+        verify(bankAccountServiceQueryBuilder).BankAccountServiceMappingSearchQuery(
+                (BankAccountServiceMappingSearchCriteria) any(), (Map<String, Object>) any());
+        verify(namedParameterJdbcTemplate).query((String) any(), (Map<String, Object>) any(), (RowMapper<Object>) any());
     }
 
     @Test
     void testSearchBankAccountBranches() throws DataAccessException {
+        when(bankAccountServiceQueryBuilder.getAllBankAccountsForServiceQuery()).thenReturn("3");
         ArrayList<Long> resultLongList = new ArrayList<>();
-        when(this.jdbcTemplate.queryForList((String) any(), (Class<Long>) any(), (Object[]) any()))
-                .thenReturn(resultLongList);
-        when(this.bankAccountServiceQueryBuilder.getAllBankAccountsForServiceQuery()).thenReturn("3");
-        List<Long> actualSearchBankAccountBranchesResult = this.bankAccountMappingRepository
-                .searchBankAccountBranches("42");
+        when(jdbcTemplate.queryForList((String) any(), (Class<Long>) any(), (Object[]) any())).thenReturn(resultLongList);
+        List<Long> actualSearchBankAccountBranchesResult = bankAccountMappingRepository.searchBankAccountBranches("42");
         assertSame(resultLongList, actualSearchBankAccountBranchesResult);
         assertTrue(actualSearchBankAccountBranchesResult.isEmpty());
-        verify(this.jdbcTemplate).queryForList((String) any(), (Class<Long>) any(), (Object[]) any());
-        verify(this.bankAccountServiceQueryBuilder).getAllBankAccountsForServiceQuery();
+        verify(bankAccountServiceQueryBuilder).getAllBankAccountsForServiceQuery();
+        verify(jdbcTemplate).queryForList((String) any(), (Class<Long>) any(), (Object[]) any());
+    }
+
+    @Test
+    void testSearchBankAccountBranches2() throws DataAccessException {
+        when(bankAccountServiceQueryBuilder.getAllBankAccountsForServiceQuery()).thenReturn("3");
+        when(jdbcTemplate.queryForList((String) any(), (Class<Long>) any(), (Object[]) any()))
+                .thenThrow(new CustomException("Code", "An error occurred"));
+        assertThrows(CustomException.class, () -> bankAccountMappingRepository.searchBankAccountBranches("42"));
+        verify(bankAccountServiceQueryBuilder).getAllBankAccountsForServiceQuery();
+        verify(jdbcTemplate).queryForList((String) any(), (Class<Long>) any(), (Object[]) any());
     }
 }
 

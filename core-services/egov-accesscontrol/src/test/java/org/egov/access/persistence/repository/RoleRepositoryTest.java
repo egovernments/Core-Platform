@@ -1,124 +1,133 @@
 package org.egov.access.persistence.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.egov.access.domain.model.Role;
 import org.egov.access.web.contract.role.RoleRequest;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.client.RestTemplate;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-public class RoleRepositoryTest {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-	@Autowired
-	private RoleRepository roleRepository;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-	@MockBean
-	private NamedParameterJdbcTemplate namedParamJdbcTemplat;
+@ContextConfiguration(classes = {RoleRepository.class})
+@ExtendWith(SpringExtension.class)
+class RoleRepositoryTest {
+    @MockBean
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-	@Test
-	@Sql(scripts = { "/sql/clearRole.sql" })
-	public void testshouldcreateroles() {
+    @MockBean
+    private RestTemplate restTemplate;
 
-		RoleRequest roleRequest = new RoleRequest();
+    @Autowired
+    private RoleRepository roleRepository;
 
-		roleRequest.setRequestInfo(getRequestInfo());
-		roleRequest.setRoles(getRoles());
+    @Test
+    void testCreateRole2() {
+        when(namedParameterJdbcTemplate.batchUpdate((String) any(), (Map<String, ?>[]) any()))
+                .thenReturn(new int[]{1, 1, 1, 1});
 
-		List<Role> roles = roleRepository.createRole(roleRequest);
-		assertThat(roles.size()).isEqualTo(2);
-	}
+        RoleRequest roleRequest = new RoleRequest();
+        ArrayList<Role> roleList = new ArrayList<>();
+        roleRequest.setRoles(roleList);
+        List<Role> actualCreateRoleResult = roleRepository.createRole(roleRequest);
+        assertSame(roleList, actualCreateRoleResult);
+        assertTrue(actualCreateRoleResult.isEmpty());
+        verify(namedParameterJdbcTemplate).batchUpdate((String) any(), (Map<String, ?>[]) any());
+    }
 
-	@Test
-	@Sql(scripts = { "/sql/clearRole.sql" })
-	public void testRolessIfThereisNoRoles() {
+    @Test
+    void testCreateRole6() {
+        when(namedParameterJdbcTemplate.batchUpdate((String) any(), (Map<String, ?>[]) any()))
+                .thenReturn(new int[]{1, 1, 1, 1});
 
-		RoleRequest roleRequest = new RoleRequest();
+        ArrayList<Role> roleList = new ArrayList<>();
+        roleList.add(new Role());
 
-		List<Role> roleList = new ArrayList<Role>();
+        User user = new User();
+        user.setId(123L);
+        RequestInfo rInfo = ActionRepository.getRInfo();
+        rInfo.setUserInfo(user);
 
-		roleRequest.setRoles(roleList);
+        RoleRequest roleRequest = new RoleRequest();
+        roleRequest.setRequestInfo(rInfo);
+        roleRequest.setRoles(roleList);
+        List<Role> actualCreateRoleResult = roleRepository.createRole(roleRequest);
+        assertSame(roleList, actualCreateRoleResult);
+        assertEquals(1, actualCreateRoleResult.size());
+        verify(namedParameterJdbcTemplate).batchUpdate((String) any(), (Map<String, ?>[]) any());
+    }
 
-		List<Role> roles = roleRepository.createRole(roleRequest);
+    @Test
+    void testUpdateRole2() {
+        when(namedParameterJdbcTemplate.batchUpdate((String) any(), (Map<String, ?>[]) any()))
+                .thenReturn(new int[]{1, 1, 1, 1});
 
-		assertThat(roles.size()).isEqualTo(0);
-	}
+        RoleRequest roleRequest = new RoleRequest();
+        ArrayList<Role> roleList = new ArrayList<>();
+        roleRequest.setRoles(roleList);
+        List<Role> actualUpdateRoleResult = roleRepository.updateRole(roleRequest);
+        assertSame(roleList, actualUpdateRoleResult);
+        assertTrue(actualUpdateRoleResult.isEmpty());
+        verify(namedParameterJdbcTemplate).batchUpdate((String) any(), (Map<String, ?>[]) any());
+    }
 
-	@Test
-	@Sql(scripts = { "/sql/clearRole.sql", "/sql/insertRoleData.sql" })
-	public void testShouldUpdateRoles() {
+    @Test
+    void testUpdateRole6() {
+        when(namedParameterJdbcTemplate.batchUpdate((String) any(), (Map<String, ?>[]) any()))
+                .thenReturn(new int[]{1, 1, 1, 1});
 
-		RoleRequest roleRequest = new RoleRequest();
+        ArrayList<Role> roleList = new ArrayList<>();
+        roleList.add(new Role());
 
-		roleRequest.setRequestInfo(getRequestInfo());
+        User user = new User();
+        user.setId(123L);
+        RequestInfo rInfo = ActionRepository.getRInfo();
+        rInfo.setUserInfo(user);
 
-		List<Role> roleList = new ArrayList<Role>();
+        RoleRequest roleRequest = new RoleRequest();
+        roleRequest.setRequestInfo(rInfo);
+        roleRequest.setRoles(roleList);
+        List<Role> actualUpdateRoleResult = roleRepository.updateRole(roleRequest);
+        assertSame(roleList, actualUpdateRoleResult);
+        assertEquals(1, actualUpdateRoleResult.size());
+        verify(namedParameterJdbcTemplate).batchUpdate((String) any(), (Map<String, ?>[]) any());
+    }
 
-		Role role = Role.builder().id(1L).name("Citizen").code("citizencode").description("citizendescription").build();
+    @Test
+    void testCheckRoleNameDuplicationValidationErrors() throws DataAccessException {
+        SqlRowSet sqlRowSet = mock(SqlRowSet.class);
+        when(sqlRowSet.getString((String) any())).thenReturn("String");
+        when(sqlRowSet.next()).thenReturn(true).thenReturn(true).thenReturn(false);
+        when(namedParameterJdbcTemplate.queryForRowSet((String) any(), (Map<String, Object>) any())).thenReturn(sqlRowSet);
+        assertTrue(roleRepository.checkRoleNameDuplicationValidationErrors("Role Name"));
+        verify(namedParameterJdbcTemplate).queryForRowSet((String) any(), (Map<String, Object>) any());
+        verify(sqlRowSet).next();
+        verify(sqlRowSet, atLeast(1)).getString((String) any());
+    }
 
-		roleList.add(role);
-		roleRequest.setRoles(roleList);
-
-		List<Role> roles = roleRepository.updateRole(roleRequest);
-
-		assertThat(roles.size()).isEqualTo(1);
-		assertThat(roles.get(0).getCode().equals("citizencode"));
-		assertThat(roles.get(0).getDescription().equals("citizendescription"));
-	}
-
-	@Test
-	@Sql(scripts = { "/sql/clearRole.sql", "/sql/insertRoleData.sql" })
-	public void testCheckRoleNameDuplicationValidationExist() {
-
-		boolean exist = roleRepository.checkRoleNameDuplicationValidationErrors("SUPERUSER");
-
-		assertThat(exist == true);
-
-	}
-
-	@Test
-	@Sql(scripts = { "/sql/clearRole.sql", "/sql/insertRoleData.sql" })
-	public void testCheckRoleNameDuplicationValidationErrors() {
-
-		boolean exist = roleRepository.checkRoleNameDuplicationValidationErrors("Super User");
-
-		assertThat(exist == false);
-
-	}
-
-	private List<Role> getRoles() {
-
-		List<Role> roles = new ArrayList<>();
-		Role role1 = Role.builder().id(1L).name("Citizen").code("test1").description("Citizen of a demography").build();
-		Role role2 = Role.builder().id(2L).name("Employee").code("test2").description("Employee of an org").build();
-		roles.add(role1);
-		roles.add(role2);
-
-		return roles;
-	}
-
-	private RequestInfo getRequestInfo() {
-
-		RequestInfo request = new RequestInfo();
-
-		User user = new User();
-
-		user.setId(1l);
-		request.setUserInfo(user);
-
-		return request;
-	}
-
+    @Test
+    void testGetRInfo() {
+        RequestInfo actualRInfo = RoleRepository.getRInfo();
+        assertEquals("action", actualRInfo.getAction());
+        assertEquals("version", actualRInfo.getVer());
+        assertEquals("msgId", actualRInfo.getMsgId());
+        assertEquals("key", actualRInfo.getKey());
+        assertEquals("did", actualRInfo.getDid());
+        assertEquals("a487e887-cafd-41cf-bb8a-2245acbb6c01", actualRInfo.getAuthToken());
+        assertEquals("apiId", actualRInfo.getApiId());
+    }
 }
+

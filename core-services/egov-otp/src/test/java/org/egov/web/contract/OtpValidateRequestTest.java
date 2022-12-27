@@ -2,10 +2,8 @@ package org.egov.web.contract;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.domain.model.ValidateRequest;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class OtpValidateRequestTest {
 
@@ -18,9 +16,9 @@ public class OtpValidateRequestTest {
 
         final ValidateRequest domain = validateRequest.toDomainValidateRequest();
 
-        assertNotNull(domain);
-        assertEquals("otp", domain.getOtp());
-        assertEquals("identity", domain.getIdentity());
-        assertEquals("tenant", domain.getTenantId());
+        Assertions.assertNotNull(domain);
+        Assertions.assertEquals("otp", domain.getOtp());
+        Assertions.assertEquals("identity", domain.getIdentity());
+        Assertions.assertEquals("tenant", domain.getTenantId());
     }
 }

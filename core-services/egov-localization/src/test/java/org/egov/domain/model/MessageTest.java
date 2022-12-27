@@ -1,10 +1,7 @@
 package org.egov.domain.model;
 
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class MessageTest {
     @Test
@@ -31,7 +28,7 @@ public class MessageTest {
             .messageIdentity(messageIdentity2)
             .build();
 
-        assertEquals(message1, message2);
+        Assertions.assertEquals(message1, message2);
     }
 
     @Test
@@ -56,7 +53,7 @@ public class MessageTest {
             .message("mh message")
             .messageIdentity(messageIdentity2)
             .build();
-        assertTrue(message1.isMoreSpecificComparedTo(message2));
+        Assertions.assertTrue(message1.isMoreSpecificComparedTo(message2));
     }
 
     @Test
@@ -81,6 +78,6 @@ public class MessageTest {
             .message("mh message")
             .messageIdentity(messageIdentity2)
             .build();
-        assertFalse(message2.isMoreSpecificComparedTo(message1));
+        Assertions.assertFalse(message2.isMoreSpecificComparedTo(message1));
     }
 }

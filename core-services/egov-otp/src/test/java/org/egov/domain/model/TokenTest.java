@@ -1,13 +1,11 @@
 package org.egov.domain.model;
 
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class TokenTest {
 
@@ -20,7 +18,7 @@ public class TokenTest {
                 .expiryDateTime(now.plusSeconds(30))
                 .build();
 
-        assertFalse(token.isExpired(now));
+        Assertions.assertFalse(token.isExpired(now));
     }
 
     @Test
@@ -31,7 +29,7 @@ public class TokenTest {
                 .expiryDateTime(now)
                 .build();
 
-        assertFalse(token.isExpired(now));
+        Assertions.assertFalse(token.isExpired(now));
     }
 
     @Test
@@ -42,7 +40,7 @@ public class TokenTest {
                 .expiryDateTime(now.minusSeconds(30))
                 .build();
 
-        assertTrue(token.isExpired(now));
+        Assertions.assertTrue(token.isExpired(now));
     }
 
 

@@ -1,13 +1,13 @@
 package org.egov.domain.model;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,8 +22,8 @@ public class TokensTest {
         when(token1.isExpired(now)).thenReturn(false);
         final Tokens tokens = new Tokens(Collections.singletonList(token1));
 
-        assertTrue(tokens.hasSingleNonExpiredToken(now));
-        assertEquals(token1, tokens.getNonExpiredToken(now));
+        Assertions.assertTrue(tokens.hasSingleNonExpiredToken(now));
+        Assertions.assertEquals(token1, tokens.getNonExpiredToken(now));
     }
 
     @Test
@@ -31,8 +31,8 @@ public class TokensTest {
         final Tokens tokens = new Tokens(Collections.emptyList());
         final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
-        assertFalse(tokens.hasSingleNonExpiredToken(now));
-        assertNull(tokens.getNonExpiredToken(now));
+        Assertions.assertFalse(tokens.hasSingleNonExpiredToken(now));
+        Assertions.assertNull(tokens.getNonExpiredToken(now));
     }
 
     @Test
@@ -40,7 +40,7 @@ public class TokensTest {
         final Tokens tokens = new Tokens(null);
         final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
-        assertFalse(tokens.hasSingleNonExpiredToken(now));
+        Assertions.assertFalse(tokens.hasSingleNonExpiredToken(now));
     }
 
     @Test
@@ -53,6 +53,6 @@ public class TokensTest {
 
         final Tokens tokens = new Tokens(Arrays.asList(token1, token2));
 
-        assertFalse(tokens.hasSingleNonExpiredToken(now));
+        Assertions.assertFalse(tokens.hasSingleNonExpiredToken(now));
     }
 }

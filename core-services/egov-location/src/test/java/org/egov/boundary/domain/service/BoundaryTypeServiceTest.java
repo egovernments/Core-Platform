@@ -1,22 +1,21 @@
 package org.egov.boundary.domain.service;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
+import org.egov.boundary.persistence.repository.BoundaryTypeRepository;
+import org.egov.boundary.web.contract.BoundaryType;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.egov.boundary.persistence.repository.BoundaryTypeRepository;
-import org.egov.boundary.web.contract.BoundaryType;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BoundaryTypeServiceTest {
 
 	@Mock
@@ -37,10 +36,10 @@ public class BoundaryTypeServiceTest {
 		
 		List<BoundaryType> boundaryTypeList = boundaryTypeService.getAllBoundarytypesByNameAndTenant("default","Test");
 		
-		assertTrue(boundaryTypeList.size() == 2);
-		assertFalse(boundaryTypeList.isEmpty());
-		assertTrue(boundaryTypeList != null);
-		assertTrue(boundaryTypeList.get(0).getName().equals("City 1"));
+		Assertions.assertTrue(boundaryTypeList.size() == 2);
+		Assertions.assertFalse(boundaryTypeList.isEmpty());
+		Assertions.assertTrue(boundaryTypeList != null);
+		Assertions.assertTrue(boundaryTypeList.get(0).getName().equals("City 1"));
 	}
 
 	

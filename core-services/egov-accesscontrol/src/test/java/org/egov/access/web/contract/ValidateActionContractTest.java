@@ -3,11 +3,10 @@ package org.egov.access.web.contract;
 import org.egov.access.web.contract.role.RoleContract;
 import org.egov.access.web.contract.validateaction.TenantRoleContract;
 import org.egov.access.web.contract.validateaction.ValidateActionContract;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
 
 public class ValidateActionContractTest {
 
@@ -19,8 +18,8 @@ public class ValidateActionContractTest {
 		ValidateActionContract validateAction = ValidateActionContract.builder().tenantRole(tenantRole).actionUrl("url")
 				.build();
 
-		assertEquals(tenantRole, validateAction.getTenantRole());
-		assertEquals("url", validateAction.getActionUrl());
+		Assertions.assertEquals(tenantRole, validateAction.getTenantRole());
+		Assertions.assertEquals("url", validateAction.getActionUrl());
 
 	}
 }

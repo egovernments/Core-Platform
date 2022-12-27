@@ -10,14 +10,14 @@ import org.egov.boundary.web.contract.HierarchyType;
 import org.egov.boundary.web.contract.factory.ResponseInfoFactory;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
@@ -26,13 +26,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebMvcTest(BoundaryTypeController.class)
 @Import(TestConfiguration.class)
 public class BoundaryTypeControllerTest {
@@ -115,17 +115,6 @@ public class BoundaryTypeControllerTest {
 				.content(getFileContents("boundaryTypeSearchResponse.json"))).andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(content().json(getFileContents("boundaryTypeSearchResponse.json")));
-	}
-	
-	@Test
-	public void testShouldNotCreateBoundaryTypeWithoutTenant() throws Exception {
-		HierarchyType hierarchyType = new HierarchyType();
-		hierarchyType.setCode("Test");
-		when(hierarchyTypeService.findByCodeAndTenantId(any(String.class), any(String.class))).thenReturn(hierarchyType);
-		mockMvc.perform(put("/boundarytypes/create").contentType(contentType)
-				.content(getFileContents("boundaryTypeCreateRequestWithoutTenant.json"))).andExpect(status().isBadRequest())
-				.andExpect(content().contentType(contentType))
-				.andExpect(content().json(getFileContents("boundaryTypeCreateResponseWithoutTenant.json")));
 	}
 	
 	@Test

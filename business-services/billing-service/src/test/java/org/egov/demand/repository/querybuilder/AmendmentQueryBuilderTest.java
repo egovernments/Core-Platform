@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.util.HashSet;
 
 import org.egov.demand.amendment.model.AmendmentCriteria;
-import org.egov.demand.amendment.model.enums.AmendmentStatus;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +24,6 @@ class AmendmentQueryBuilderTest {
     @Autowired
     private AmendmentQueryBuilder amendmentQueryBuilder;
 
-
     @Test
     void testGetSearchQuery() {
         AmendmentCriteria amendmentCriteria = new AmendmentCriteria();
@@ -37,12 +35,84 @@ class AmendmentQueryBuilderTest {
                         + " effectivefrom, amendeddemandid, createdby, createdtime, lastmodifiedby, lastmodifiedtime, additionaldetails,"
                         + " amdl.id as detailid, amdl.amendmentid as detailamendmentid, taxheadcode, taxamount, doc.id as docid,"
                         + " doc.amendmentid as docamendmentid, documentType, fileStoreid, documentuid, doc.status as docstatus "
-                        + " FROM egbs_amendment amendment  INNER JOIN  egbs_amendment_taxdetail amdl ON amendment.id = amdl.amendmentid"
-                        + " \tINNER JOIN egbs_document doc ON amendment.id = doc.amendmentid WHERE  amendment.tenantid = :tenantid"
-                        + "  LIMIT :limit  OFFSET :offset",
-                this.amendmentQueryBuilder.getSearchQuery(amendmentCriteria, mapSqlParameterSource));
+                        + " FROM {schema}.egbs_amendment amendment  INNER JOIN  {schema}.egbs_amendment_taxdetail amdl ON"
+                        + " amendment.id = amdl.amendmentid \tINNER JOIN {schema}.egbs_document doc ON amendment.id = doc.amendmentid"
+                        + " WHERE  amendment.tenantid = :tenantid  LIMIT :limit  OFFSET :offset",
+                amendmentQueryBuilder.getSearchQuery(amendmentCriteria, mapSqlParameterSource));
         verify(mapSqlParameterSource, atLeast(1)).addValue((String) any(), (Object) any());
     }
 
+    @Test
+    void testGetSearchQuery3() {
+        HashSet<String> consumerCode = new HashSet<>();
+        AmendmentCriteria amendmentCriteria = new AmendmentCriteria("42", "42", "42", consumerCode,
+                AmendmentQueryBuilder.AMENDMENT_SEARCH_QUERY, new HashSet<>());
+
+        MapSqlParameterSource mapSqlParameterSource = mock(MapSqlParameterSource.class);
+        when(mapSqlParameterSource.addValue((String) any(), (Object) any()))
+                .thenReturn(mock(MapSqlParameterSource.class));
+        assertEquals(
+                "SELECT amendment.id as amendmentuuid, tenantid, amendment.amendmentid as amendmentid, businessservice,"
+                        + " consumercode, amendmentreason, reasondocumentnumber, amendment.status as amendmentstatus, effectivetill,"
+                        + " effectivefrom, amendeddemandid, createdby, createdtime, lastmodifiedby, lastmodifiedtime, additionaldetails,"
+                        + " amdl.id as detailid, amdl.amendmentid as detailamendmentid, taxheadcode, taxamount, doc.id as docid,"
+                        + " doc.amendmentid as docamendmentid, documentType, fileStoreid, documentuid, doc.status as docstatus "
+                        + " FROM {schema}.egbs_amendment amendment  INNER JOIN  {schema}.egbs_amendment_taxdetail amdl ON"
+                        + " amendment.id = amdl.amendmentid \tINNER JOIN {schema}.egbs_document doc ON amendment.id = doc.amendmentid"
+                        + " WHERE  amendment.tenantid = :tenantid  AND  businessservice= :businessservice AND  amendment.amendmentid"
+                        + "=:amendmentid LIMIT :limit  OFFSET :offset",
+                amendmentQueryBuilder.getSearchQuery(amendmentCriteria, mapSqlParameterSource));
+        verify(mapSqlParameterSource, atLeast(1)).addValue((String) any(), (Object) any());
+    }
+
+    @Test
+    void testGetSearchQuery4() {
+        HashSet<String> stringSet = new HashSet<>();
+        stringSet.add(AmendmentQueryBuilder.AMENDMENT_SEARCH_QUERY);
+        AmendmentCriteria amendmentCriteria = new AmendmentCriteria("42", "42", "42", stringSet,
+                AmendmentQueryBuilder.AMENDMENT_SEARCH_QUERY, new HashSet<>());
+
+        MapSqlParameterSource mapSqlParameterSource = mock(MapSqlParameterSource.class);
+        when(mapSqlParameterSource.addValue((String) any(), (Object) any()))
+                .thenReturn(mock(MapSqlParameterSource.class));
+        assertEquals(
+                "SELECT amendment.id as amendmentuuid, tenantid, amendment.amendmentid as amendmentid, businessservice,"
+                        + " consumercode, amendmentreason, reasondocumentnumber, amendment.status as amendmentstatus, effectivetill,"
+                        + " effectivefrom, amendeddemandid, createdby, createdtime, lastmodifiedby, lastmodifiedtime,"
+                        + " additionaldetails, amdl.id as detailid, amdl.amendmentid as detailamendmentid, taxheadcode, taxamount,"
+                        + " doc.id as docid, doc.amendmentid as docamendmentid, documentType, fileStoreid, documentuid, doc.status"
+                        + " as docstatus  FROM {schema}.egbs_amendment amendment  INNER JOIN  {schema}.egbs_amendment_taxdetail"
+                        + " amdl ON amendment.id = amdl.amendmentid \tINNER JOIN {schema}.egbs_document doc ON amendment.id ="
+                        + " doc.amendmentid WHERE  amendment.tenantid = :tenantid  AND  consumercode IN (:consumercode) AND "
+                        + " businessservice= :businessservice AND  amendment.amendmentid=:amendmentid LIMIT :limit  OFFSET"
+                        + " :offset",
+                amendmentQueryBuilder.getSearchQuery(amendmentCriteria, mapSqlParameterSource));
+        verify(mapSqlParameterSource, atLeast(1)).addValue((String) any(), (Object) any());
+    }
+
+    @Test
+    void testGetSearchQuery5() {
+        HashSet<String> stringSet = new HashSet<>();
+        stringSet.add(AmendmentQueryBuilder.AMENDMENT_SEARCH_QUERY);
+        AmendmentCriteria amendmentCriteria = new AmendmentCriteria("42", "42", "42", new HashSet<>(),
+                AmendmentQueryBuilder.AMENDMENT_SEARCH_QUERY, stringSet);
+
+        MapSqlParameterSource mapSqlParameterSource = mock(MapSqlParameterSource.class);
+        when(mapSqlParameterSource.addValue((String) any(), (Object) any()))
+                .thenReturn(mock(MapSqlParameterSource.class));
+        assertEquals(
+                "SELECT amendment.id as amendmentuuid, tenantid, amendment.amendmentid as amendmentid, businessservice,"
+                        + " consumercode, amendmentreason, reasondocumentnumber, amendment.status as amendmentstatus, effectivetill,"
+                        + " effectivefrom, amendeddemandid, createdby, createdtime, lastmodifiedby, lastmodifiedtime,"
+                        + " additionaldetails, amdl.id as detailid, amdl.amendmentid as detailamendmentid, taxheadcode, taxamount,"
+                        + " doc.id as docid, doc.amendmentid as docamendmentid, documentType, fileStoreid, documentuid, doc.status"
+                        + " as docstatus  FROM {schema}.egbs_amendment amendment  INNER JOIN  {schema}.egbs_amendment_taxdetail"
+                        + " amdl ON amendment.id = amdl.amendmentid \tINNER JOIN {schema}.egbs_document doc ON amendment.id ="
+                        + " doc.amendmentid WHERE  amendment.tenantid = :tenantid  AND  businessservice= :businessservice AND"
+                        + "  amendment.amendmentid=:amendmentid AND  amendment.status IN ( :status ) LIMIT :limit  OFFSET"
+                        + " :offset",
+                amendmentQueryBuilder.getSearchQuery(amendmentCriteria, mapSqlParameterSource));
+        verify(mapSqlParameterSource, atLeast(1)).addValue((String) any(), (Object) any());
+    }
 }
 

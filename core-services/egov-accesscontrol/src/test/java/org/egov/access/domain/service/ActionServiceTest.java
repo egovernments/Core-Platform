@@ -1,14 +1,5 @@
 package org.egov.access.domain.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
-
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.egov.access.domain.criteria.ActionSearchCriteria;
 import org.egov.access.domain.criteria.ValidateActionCriteria;
 import org.egov.access.domain.model.Action;
@@ -24,16 +15,25 @@ import org.egov.access.web.contract.action.ActionRequest;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.json.JSONException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-@RunWith(MockitoJUnitRunner.class)
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
 public class ActionServiceTest {
 
 	@Mock
@@ -53,7 +53,7 @@ public class ActionServiceTest {
 	@Mock
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplat;
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		actionService = new ActionService(repository, actionRepository, mdmsRepository);
@@ -70,7 +70,7 @@ public class ActionServiceTest {
 				.thenReturn(actionsExpected);
 
 		List<Action> actualActions = actionService.getActions(actionSearchCriteria);
-		assertEquals(actionsExpected, actualActions);
+		Assertions.assertEquals(actionsExpected, actualActions);
 	}
 
 	@Test

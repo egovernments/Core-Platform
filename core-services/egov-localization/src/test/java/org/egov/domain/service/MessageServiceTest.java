@@ -4,24 +4,22 @@ package org.egov.domain.service;
 import org.egov.domain.model.*;
 import org.egov.persistence.repository.MessageCacheRepository;
 import org.egov.persistence.repository.MessageRepository;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ContextConfiguration;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ContextConfiguration(classes = {MessageService.class})
+@ExtendWith(MockitoExtension.class)
 public class MessageServiceTest {
     private static final String ENGLISH_INDIA = "en_IN";
     private static final String TENANT_ID = "tenant_123";
@@ -37,225 +35,117 @@ public class MessageServiceTest {
     private MessageService messageService;
 
     @Test
-    public void test_should_augment_messages_for_given_tenant_with_non_overridden_default_messages() {
-        String tenantId = "a";
-        final Tenant defaultTenant = new Tenant(Tenant.DEFAULT_TENANT);
-        final MessageIdentity messageIdentity1 = MessageIdentity.builder()
-            .code("code1")
-            .locale(ENGLISH_INDIA)
-            .module("module")
-            .tenant(defaultTenant)
-            .build();
-        Message defaultMessage1 = Message.builder()
-            .messageIdentity(messageIdentity1)
-            .message("default message1")
-            .build();
-        List<Message> defaultEnglishMessages = Collections.singletonList(defaultMessage1);
-        final MessageIdentity messageIdentity2 = MessageIdentity.builder()
-            .code("code2")
-            .locale(MR_IN)
-            .module("module")
-            .tenant(new Tenant("a"))
-            .build();
-        Message tenantMessage1 = Message.builder()
-            .messageIdentity(messageIdentity2)
-            .message("marathi message for tenant a")
-            .build();
-        List<Message> marathiMessagesForGivenTenant = Collections.singletonList(tenantMessage1);
-        when(messageRepository.findByTenantIdAndLocale(new Tenant("default"), ENGLISH_INDIA))
-            .thenReturn(defaultEnglishMessages);
-        when(messageRepository.findByTenantIdAndLocale(new Tenant("a"), MR_IN))
-            .thenReturn(marathiMessagesForGivenTenant);
-        when(messageCacheRepository.getMessages(anyString(), any())).thenReturn(null);
-        when(messageCacheRepository.getComputedMessages(anyString(), any())).thenReturn(null);
-        final MessageSearchCriteria searchCriteria = MessageSearchCriteria.builder()
-            .locale(MR_IN)
-            .tenantId(new Tenant(tenantId))
-            .module("module")
-            .build();
-        List<Message> actualMessages = messageService.getFilteredMessages(searchCriteria);
+    void testUpsert3() {
+        doNothing().when(messageRepository)
+            .upsert((String) any(), (String) any(), (String) any(), (List<Message>) any(), (AuthenticatedUser) any());
+        doNothing().when(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        Tenant tenant = new Tenant("42");
+        MessageIdentity messageIdentity = mock(MessageIdentity.class);
+        when(messageIdentity.getLocale()).thenReturn("en");
+        Message message = mock(Message.class);
+        when(message.getLocale()).thenReturn("en");
+        when(message.getModule()).thenReturn("Module");
+        when(message.getTenant()).thenReturn("Tenant");
+        when(message.getMessageIdentity()).thenReturn(messageIdentity);
 
-        assertEquals(1, actualMessages.size());
-       // assertEquals("code1", actualMessages.get(0).getCode());
-        assertEquals("code2", actualMessages.get(0).getCode());
+        ArrayList<Message> messageList = new ArrayList<>();
+        messageList.add(message);
+        messageService.upsert(tenant, messageList, new AuthenticatedUser(123L));
+        verify(messageRepository).upsert((String) any(), (String) any(), (String) any(), (List<Message>) any(),
+            (AuthenticatedUser) any());
+        verify(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        verify(message).getLocale();
+        verify(message).getModule();
+        verify(message).getTenant();
+        verify(message).getMessageIdentity();
+        verify(messageIdentity).getLocale();
     }
 
     @Test
-    public void test_should_cache_computed_messages_post_computation() {
-        String tenantId = "a";
-
-        final Tenant defaultTenant = new Tenant(Tenant.DEFAULT_TENANT);
-        final MessageIdentity messageIdentity1 = MessageIdentity.builder()
-            .code("code1")
-            .locale(ENGLISH_INDIA)
-            .module("module")
-            .tenant(defaultTenant)
-            .build();
-        Message defaultMessage1 = Message.builder()
-            .messageIdentity(messageIdentity1)
-            .message("default message1")
-            .build();
-        List<Message> defaultEnglishMessages = Collections.singletonList(defaultMessage1);
-        when(messageRepository.findByTenantIdAndLocale(new Tenant("default"), ENGLISH_INDIA))
-            .thenReturn(defaultEnglishMessages);
-        when(messageRepository.findByTenantIdAndLocale(new Tenant("a"), MR_IN))
-            .thenReturn(Collections.emptyList());
-        when(messageCacheRepository.getMessages(anyString(), any())).thenReturn(null);
-        when(messageCacheRepository.getComputedMessages(anyString(), any())).thenReturn(null);
-        final MessageSearchCriteria searchCriteria = MessageSearchCriteria.builder()
-            .locale(MR_IN)
-            .tenantId(new Tenant(tenantId))
-            .module("module")
-            .build();
-
-        messageService.getFilteredMessages(searchCriteria);
-
-        verify(messageCacheRepository).cacheComputedMessages(MR_IN, new Tenant(tenantId), defaultEnglishMessages);
+    void testCreate() {
+        doNothing().when(messageRepository).save((List<Message>) any(), (AuthenticatedUser) any());
+        Tenant tenant = new Tenant("42");
+        ArrayList<Message> messages = new ArrayList<>();
+        messageService.create(tenant, messages, new AuthenticatedUser(123L));
+        verify(messageRepository).save((List<Message>) any(), (AuthenticatedUser) any());
     }
 
     @Test
-    public void test_should_cache_messages_for_given_tenant_and_locale_post_data_store_retrieval() {
-        String tenantId = "a";
+    void testCreate2() {
+        doNothing().when(messageRepository).save((List<Message>) any(), (AuthenticatedUser) any());
+        doNothing().when(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        Tenant tenant = new Tenant("42");
+        MessageIdentity messageIdentity = mock(MessageIdentity.class);
+        when(messageIdentity.getLocale()).thenReturn("en");
+        Message message = mock(Message.class);
+        when(message.getMessageIdentity()).thenReturn(messageIdentity);
 
-        final Tenant defaultTenant = new Tenant(Tenant.DEFAULT_TENANT);
-        final MessageIdentity messageIdentity1 = MessageIdentity.builder()
-            .code("code1")
-            .locale(ENGLISH_INDIA)
-            .module("module")
-            .tenant(defaultTenant)
-            .build();
-        Message defaultMessage1 = Message.builder()
-            .messageIdentity(messageIdentity1)
-            .message("default message1")
-            .build();
-        List<Message> defaultEnglishMessages = Collections.singletonList(defaultMessage1);
-        when(messageRepository.findByTenantIdAndLocale(new Tenant("default"), ENGLISH_INDIA))
-            .thenReturn(defaultEnglishMessages);
-        final List<Message> tenantSpecificMessages = Collections.emptyList();
-        when(messageRepository.findByTenantIdAndLocale(new Tenant("a"), MR_IN))
-            .thenReturn(tenantSpecificMessages);
-        when(messageCacheRepository.getMessages(anyString(), any())).thenReturn(null);
-        when(messageCacheRepository.getComputedMessages(anyString(), any())).thenReturn(null);
-        final MessageSearchCriteria searchCriteria = MessageSearchCriteria.builder()
-            .locale(MR_IN)
-            .tenantId(new Tenant(tenantId))
-            .module("module")
-            .build();
-        messageService.getFilteredMessages(searchCriteria);
-
-        verify(messageCacheRepository).cacheMessages(ENGLISH_INDIA, new Tenant("default"), defaultEnglishMessages);
-        verify(messageCacheRepository).cacheMessages(MR_IN, new Tenant("default"), tenantSpecificMessages);
-        verify(messageCacheRepository).cacheMessages(MR_IN, new Tenant("a"), tenantSpecificMessages);
+        ArrayList<Message> messageList = new ArrayList<>();
+        messageList.add(message);
+        messageService.create(tenant, messageList, new AuthenticatedUser(123L));
+        verify(messageRepository).save((List<Message>) any(), (AuthenticatedUser) any());
+        verify(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        verify(message).getMessageIdentity();
+        verify(messageIdentity).getLocale();
     }
 
     @Test
-    public void test_should_get_messages_with_precedence_based_on_tenant_hierarchy() {
-        String tenantId = "a.b.c";
+    void testUpdateMessagesForModule() {
+        Tenant tenant = new Tenant("42");
+        ArrayList<Message> messages = new ArrayList<>();
+        assertThrows(IllegalArgumentException.class,
+            () -> messageService.updateMessagesForModule(tenant, messages, new AuthenticatedUser(123L)));
+    }
 
-        final Tenant defaultTenant = new Tenant(Tenant.DEFAULT_TENANT);
-        final MessageIdentity messageIdentity1 = MessageIdentity.builder()
-            .code("code1")
-            .locale(ENGLISH_INDIA)
-            .module("module")
-            .tenant(defaultTenant)
-            .build();
-        Message defaultMessage1 = Message.builder()
-            .messageIdentity(messageIdentity1)
-            .message("default message1")
-            .build();
-        final MessageIdentity messageIdentity2 = MessageIdentity.builder()
-            .code("code2")
-            .locale(ENGLISH_INDIA)
-            .module("module")
-            .tenant(defaultTenant)
-            .build();
-        Message defaultMessage2 = Message.builder()
-            .messageIdentity(messageIdentity2)
-            .message("default message2")
-            .build();
-        final MessageIdentity messageIdentity3 = MessageIdentity.builder()
-            .code("code3")
-            .locale(ENGLISH_INDIA)
-            .module("module")
-            .tenant(defaultTenant)
-            .build();
-        Message defaultMessage3 = Message.builder()
-            .messageIdentity(messageIdentity3)
-            .message("default message3")
-            .build();
-        List<Message> defaultEnglishMessages = Arrays.asList(defaultMessage1, defaultMessage2, defaultMessage3);
-        final MessageIdentity messageIdentity4 = MessageIdentity.builder()
-            .code("code1")
-            .locale(MR_IN)
-            .module("module")
-            .tenant(new Tenant("a.b.c"))
-            .build();
-        Message tenantMessage1 = Message.builder()
-            .messageIdentity(messageIdentity4)
-            .message("marathi message for tenant a.b.c")
-            .build();
-        final MessageIdentity messageIdentity5 = MessageIdentity.builder()
-            .code("code5")
-            .locale(MR_IN)
-            .module("module")
-            .tenant(new Tenant("a.b.c"))
-            .build();
-        Message tenantMessage2 = Message.builder()
-            .messageIdentity(messageIdentity5)
-            .message("marathi message for tenant a.b.c")
-            .build();
-        List<Message> marathiMessagesForGivenTenant = Arrays.asList(tenantMessage1, tenantMessage2);
-        final MessageIdentity messageIdentity6 = MessageIdentity.builder()
-            .code("code2")
-            .locale(MR_IN)
-            .module("module")
-            .tenant(new Tenant("a.b"))
-            .build();
-        Message tenantParentMessage1 = Message.builder()
-            .messageIdentity(messageIdentity6)
-            .message("marathi message for tenant a.b")
-            .build();
-        final MessageIdentity messageIdentity7 = MessageIdentity.builder()
-            .code("code4")
-            .locale(MR_IN)
-            .module("module")
-            .tenant(new Tenant("a.b"))
-            .build();
-        Message tenantParentMessage2 = Message.builder()
-            .messageIdentity(messageIdentity7)
-            .message("marathi message for tenant a.b")
-            .build();
-        List<Message> marathiMessagesForTenantParent = Arrays.asList(tenantParentMessage1, tenantParentMessage2);
+    @Test
+    void testUpdateMessagesForModule2() {
+        doNothing().when(messageRepository)
+            .update((String) any(), (String) any(), (String) any(), (List<Message>) any(), (AuthenticatedUser) any());
+        doNothing().when(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        Tenant tenant = mock(Tenant.class);
+        MessageIdentity messageIdentity = mock(MessageIdentity.class);
+        when(messageIdentity.getLocale()).thenReturn("en");
+        Message message = mock(Message.class);
+        when(message.getLocale()).thenReturn("en");
+        when(message.getModule()).thenReturn("Module");
+        when(message.getTenant()).thenReturn("Tenant");
+        when(message.getMessageIdentity()).thenReturn(messageIdentity);
 
-        when(messageRepository.findByTenantIdAndLocale(new Tenant("default"), ENGLISH_INDIA))
-            .thenReturn(defaultEnglishMessages);
-        when(messageRepository.findByTenantIdAndLocale(new Tenant("a.b.c"), MR_IN))
-            .thenReturn(marathiMessagesForGivenTenant);
-        when(messageRepository.findByTenantIdAndLocale(new Tenant("a.b"), MR_IN))
-            .thenReturn(marathiMessagesForTenantParent);
-        when(messageRepository.findByTenantIdAndLocale(new Tenant("a"), MR_IN))
-            .thenReturn(Collections.emptyList());
-        when(messageCacheRepository.getMessages(anyString(), any())).thenReturn(null);
-        when(messageCacheRepository.getComputedMessages(anyString(), any())).thenReturn(null);
-        final MessageSearchCriteria searchCriteria = MessageSearchCriteria.builder()
-            .locale(MR_IN)
-            .tenantId(new Tenant(tenantId))
-            .module("module")
-            .build();
+        ArrayList<Message> messageList = new ArrayList<>();
+        messageList.add(message);
+        messageService.updateMessagesForModule(tenant, messageList, new AuthenticatedUser(123L));
+        verify(messageRepository).update((String) any(), (String) any(), (String) any(), (List<Message>) any(),
+            (AuthenticatedUser) any());
+        verify(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        verify(message).getLocale();
+        verify(message).getModule();
+        verify(message).getTenant();
+        verify(message).getMessageIdentity();
+        verify(messageIdentity).getLocale();
+    }
 
-        List<Message> actualMessages = messageService.getFilteredMessages(searchCriteria);
+    @Test
+    void testBustCache() {
+        doNothing().when(messageCacheRepository).bustCache();
+        messageService.bustCache();
+        verify(messageCacheRepository).bustCache();
+    }
 
-        assertEquals(2, actualMessages.size());
-/*        assertEquals("code1", actualMessages.get(0).getCode());
-        assertEquals("marathi message for tenant a.b.c", actualMessages.get(0).getMessage());
-        assertEquals("code2", actualMessages.get(1).getCode());
-        assertEquals("marathi message for tenant a.b", actualMessages.get(1).getMessage());
-        assertEquals("code3", actualMessages.get(2).getCode());
-        assertEquals("default message3", actualMessages.get(2).getMessage());
-        assertEquals("code4", actualMessages.get(3).getCode());
-        assertEquals("marathi message for tenant a.b", actualMessages.get(3).getMessage());
-        assertEquals("code5", actualMessages.get(4).getCode());
-        assertEquals("marathi message for tenant a.b.c", actualMessages.get(4).getMessage());*/
+    @Test
+    void testBustCache2() {
+        doThrow(new IllegalArgumentException()).when(messageCacheRepository).bustCache();
+        assertThrows(IllegalArgumentException.class, () -> messageService.bustCache());
+        verify(messageCacheRepository).bustCache();
+    }
+
+    @Test
+    void testGetFilteredMessages3() {
+        when(messageCacheRepository.getComputedMessages((String) any(), (Tenant) any())).thenReturn(new ArrayList<>());
+        Tenant tenantId = new Tenant("42");
+        assertTrue(
+            messageService.getFilteredMessages(new MessageSearchCriteria(tenantId, "en", "Module", new HashSet<>()))
+                .isEmpty());
+        verify(messageCacheRepository).getComputedMessages((String) any(), (Tenant) any());
     }
 
     @Test
@@ -293,7 +183,7 @@ public class MessageServiceTest {
 
         List<Message> actualMessages = messageService.getFilteredMessages(searchCriteria);
 
-        assertEquals(0, actualMessages.size());
+        Assertions.assertEquals(0, actualMessages.size());
     }
 
     @Test
@@ -331,7 +221,7 @@ public class MessageServiceTest {
 
         List<Message> actualMessages = messageService.getFilteredMessages(searchCriteria);
 
-        assertEquals(0, actualMessages.size());
+        Assertions.assertEquals(0, actualMessages.size());
     }
 
   /*  @Test
@@ -371,49 +261,6 @@ public class MessageServiceTest {
 
         assertEquals(2, actualMessages.size());
     }*/
-
-    @Test
-    public void test_should_return_messages_from_cache_when_present() {
-        String tenantId = "a";
-        final MessageIdentity messageIdentity1 = MessageIdentity.builder()
-            .code("code1")
-            .locale(ENGLISH_INDIA)
-            .module("module")
-            .tenant(new Tenant("a"))
-            .build();
-        Message defaultMessage1 = Message.builder()
-            .messageIdentity(messageIdentity1)
-            .message("default message1")
-            .build();
-        List<Message> defaultEnglishMessages = Collections.singletonList(defaultMessage1);
-        final MessageIdentity messageIdentity2 = MessageIdentity.builder()
-            .code("code2")
-            .locale(MR_IN)
-            .module("module")
-            .tenant(new Tenant("a"))
-            .build();
-        Message tenantMessage1 = Message.builder()
-            .messageIdentity(messageIdentity2)
-            .message("marathi message for tenant a")
-            .build();
-        List<Message> marathiMessagesForGivenTenant = Collections.singletonList(tenantMessage1);
-        when(messageCacheRepository.getMessages(MR_IN, new Tenant("a")))
-            .thenReturn(marathiMessagesForGivenTenant);
-        when(messageCacheRepository.getMessages(ENGLISH_INDIA, new Tenant("default")))
-            .thenReturn(defaultEnglishMessages);
-        when(messageCacheRepository.getComputedMessages(anyString(), any())).thenReturn(null);
-        final MessageSearchCriteria searchCriteria = MessageSearchCriteria.builder()
-            .locale(MR_IN)
-            .tenantId(new Tenant(tenantId))
-            .module("module")
-            .build();
-
-        List<Message> actualMessages = messageService.getFilteredMessages(searchCriteria);
-
-        assertEquals(1, actualMessages.size());
-        //assertEquals("code1", actualMessages.get(0).getCode());
-        assertEquals("code2", actualMessages.get(0).getCode());
-    }
 
     @Test
     public void test_should_save_messages() {
@@ -535,6 +382,234 @@ public class MessageServiceTest {
             .delete("tenant1", ENGLISH_INDIA, "module2", Collections.singletonList("code2"));
         verify(messageRepository, times(1))
             .delete("tenant2", ENGLISH_INDIA, "module3", Collections.singletonList("code3"));
+    }
+
+    @Test
+    void testDelete() {
+        messageService.delete(new ArrayList<>());
+    }
+
+    @Test
+    void testDelete2() {
+        doNothing().when(messageRepository).delete((String) any(), (String) any(), (String) any(), (List<String>) any());
+        doNothing().when(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        MessageIdentity messageIdentity = mock(MessageIdentity.class);
+        when(messageIdentity.getCode()).thenReturn("Code");
+        when(messageIdentity.getModule()).thenReturn("Module");
+        when(messageIdentity.getLocale()).thenReturn("en");
+        when(messageIdentity.getTenant()).thenReturn(new Tenant("42"));
+
+        ArrayList<MessageIdentity> messageIdentityList = new ArrayList<>();
+        messageIdentityList.add(messageIdentity);
+        messageService.delete(messageIdentityList);
+        verify(messageRepository).delete((String) any(), (String) any(), (String) any(), (List<String>) any());
+        verify(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        verify(messageIdentity).getCode();
+        verify(messageIdentity, atLeast(1)).getLocale();
+        verify(messageIdentity).getModule();
+        verify(messageIdentity).getTenant();
+    }
+
+    @Test
+    void testDelete4() {
+        doNothing().when(messageRepository).delete((String) any(), (String) any(), (String) any(), (List<String>) any());
+        doNothing().when(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        MessageIdentity messageIdentity = mock(MessageIdentity.class);
+        when(messageIdentity.getCode()).thenReturn("Code");
+        when(messageIdentity.getModule()).thenReturn("Module");
+        when(messageIdentity.getLocale()).thenReturn("en");
+        when(messageIdentity.getTenant()).thenReturn(new Tenant("42"));
+        MessageIdentity messageIdentity1 = mock(MessageIdentity.class);
+        when(messageIdentity1.getCode()).thenReturn("Code");
+        when(messageIdentity1.getModule()).thenReturn("Module");
+        when(messageIdentity1.getLocale()).thenReturn("en");
+        when(messageIdentity1.getTenant()).thenReturn(new Tenant("42"));
+
+        ArrayList<MessageIdentity> messageIdentityList = new ArrayList<>();
+        messageIdentityList.add(messageIdentity1);
+        messageIdentityList.add(messageIdentity);
+        messageService.delete(messageIdentityList);
+        verify(messageRepository).delete((String) any(), (String) any(), (String) any(), (List<String>) any());
+        verify(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        verify(messageIdentity1).getCode();
+        verify(messageIdentity1, atLeast(1)).getLocale();
+        verify(messageIdentity1).getModule();
+        verify(messageIdentity1).getTenant();
+        verify(messageIdentity).getCode();
+        verify(messageIdentity, atLeast(1)).getLocale();
+        verify(messageIdentity).getModule();
+        verify(messageIdentity).getTenant();
+    }
+
+    @Test
+    void testDelete6() {
+        doNothing().when(messageRepository).delete((String) any(), (String) any(), (String) any(), (List<String>) any());
+        doNothing().when(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        MessageIdentity messageIdentity = mock(MessageIdentity.class);
+        when(messageIdentity.getCode()).thenReturn("Code");
+        when(messageIdentity.getModule()).thenReturn("Module");
+        when(messageIdentity.getLocale()).thenReturn("en");
+        when(messageIdentity.getTenant()).thenReturn(new Tenant("42"));
+        MessageIdentity messageIdentity1 = mock(MessageIdentity.class);
+        when(messageIdentity1.getCode()).thenReturn("Code");
+        when(messageIdentity1.getModule()).thenReturn("Module");
+        when(messageIdentity1.getLocale()).thenReturn("en");
+        when(messageIdentity1.getTenant()).thenReturn(new Tenant("42"));
+        MessageIdentity messageIdentity2 = mock(MessageIdentity.class);
+        when(messageIdentity2.getCode()).thenReturn("Code");
+        when(messageIdentity2.getModule()).thenReturn("foo");
+        when(messageIdentity2.getLocale()).thenReturn("en");
+        when(messageIdentity2.getTenant()).thenReturn(new Tenant("42"));
+
+        ArrayList<MessageIdentity> messageIdentityList = new ArrayList<>();
+        messageIdentityList.add(messageIdentity2);
+        messageIdentityList.add(messageIdentity1);
+        messageIdentityList.add(messageIdentity);
+        messageService.delete(messageIdentityList);
+        verify(messageRepository, atLeast(1)).delete((String) any(), (String) any(), (String) any(),
+            (List<String>) any());
+        verify(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        verify(messageIdentity2).getCode();
+        verify(messageIdentity2, atLeast(1)).getLocale();
+        verify(messageIdentity2).getModule();
+        verify(messageIdentity2).getTenant();
+        verify(messageIdentity1).getCode();
+        verify(messageIdentity1, atLeast(1)).getLocale();
+        verify(messageIdentity1).getModule();
+        verify(messageIdentity1).getTenant();
+        verify(messageIdentity).getCode();
+        verify(messageIdentity, atLeast(1)).getLocale();
+        verify(messageIdentity).getModule();
+        verify(messageIdentity).getTenant();
+    }
+
+    @Test
+    void testDelete7() {
+        doNothing().when(messageRepository).delete((String) any(), (String) any(), (String) any(), (List<String>) any());
+        doNothing().when(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        MessageIdentity messageIdentity = mock(MessageIdentity.class);
+        when(messageIdentity.getCode()).thenReturn("Code");
+        when(messageIdentity.getModule()).thenReturn("Module");
+        when(messageIdentity.getLocale()).thenReturn("en");
+        when(messageIdentity.getTenant()).thenReturn(new Tenant("42"));
+        MessageIdentity messageIdentity1 = mock(MessageIdentity.class);
+        when(messageIdentity1.getCode()).thenReturn("Code");
+        when(messageIdentity1.getModule()).thenReturn("Module");
+        when(messageIdentity1.getLocale()).thenReturn("en");
+        when(messageIdentity1.getTenant()).thenReturn(new Tenant("42"));
+        MessageIdentity messageIdentity2 = mock(MessageIdentity.class);
+        when(messageIdentity2.getCode()).thenReturn("Code");
+        when(messageIdentity2.getModule()).thenReturn("foo");
+        when(messageIdentity2.getLocale()).thenReturn("42");
+        when(messageIdentity2.getTenant()).thenReturn(new Tenant("42"));
+
+        ArrayList<MessageIdentity> messageIdentityList = new ArrayList<>();
+        messageIdentityList.add(messageIdentity2);
+        messageIdentityList.add(messageIdentity1);
+        messageIdentityList.add(messageIdentity);
+        messageService.delete(messageIdentityList);
+        verify(messageRepository, atLeast(1)).delete((String) any(), (String) any(), (String) any(),
+            (List<String>) any());
+        verify(messageCacheRepository, atLeast(1)).bustCacheEntry((String) any(), (Tenant) any());
+        verify(messageIdentity2).getCode();
+        verify(messageIdentity2, atLeast(1)).getLocale();
+        verify(messageIdentity2).getModule();
+        verify(messageIdentity2).getTenant();
+        verify(messageIdentity1).getCode();
+        verify(messageIdentity1, atLeast(1)).getLocale();
+        verify(messageIdentity1).getModule();
+        verify(messageIdentity1).getTenant();
+        verify(messageIdentity).getCode();
+        verify(messageIdentity, atLeast(1)).getLocale();
+        verify(messageIdentity).getModule();
+        verify(messageIdentity).getTenant();
+    }
+
+    @Test
+    void testDelete8() {
+        doNothing().when(messageRepository).delete((String) any(), (String) any(), (String) any(), (List<String>) any());
+        doNothing().when(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        MessageIdentity messageIdentity = mock(MessageIdentity.class);
+        when(messageIdentity.getCode()).thenReturn("Code");
+        when(messageIdentity.getModule()).thenReturn("Module");
+        when(messageIdentity.getLocale()).thenReturn("en");
+        when(messageIdentity.getTenant()).thenReturn(new Tenant("42"));
+        MessageIdentity messageIdentity1 = mock(MessageIdentity.class);
+        when(messageIdentity1.getCode()).thenReturn("Code");
+        when(messageIdentity1.getModule()).thenReturn("Module");
+        when(messageIdentity1.getLocale()).thenReturn("en");
+        when(messageIdentity1.getTenant()).thenReturn(new Tenant("42"));
+        MessageIdentity messageIdentity2 = mock(MessageIdentity.class);
+        when(messageIdentity2.getCode()).thenReturn("Code");
+        when(messageIdentity2.getModule()).thenReturn("foo");
+        when(messageIdentity2.getLocale()).thenReturn("en");
+        when(messageIdentity2.getTenant()).thenReturn(new Tenant("Tenant Id"));
+
+        ArrayList<MessageIdentity> messageIdentityList = new ArrayList<>();
+        messageIdentityList.add(messageIdentity2);
+        messageIdentityList.add(messageIdentity1);
+        messageIdentityList.add(messageIdentity);
+        messageService.delete(messageIdentityList);
+        verify(messageRepository, atLeast(1)).delete((String) any(), (String) any(), (String) any(),
+            (List<String>) any());
+        verify(messageCacheRepository, atLeast(1)).bustCacheEntry((String) any(), (Tenant) any());
+        verify(messageIdentity2).getCode();
+        verify(messageIdentity2, atLeast(1)).getLocale();
+        verify(messageIdentity2).getModule();
+        verify(messageIdentity2).getTenant();
+        verify(messageIdentity1).getCode();
+        verify(messageIdentity1, atLeast(1)).getLocale();
+        verify(messageIdentity1).getModule();
+        verify(messageIdentity1).getTenant();
+        verify(messageIdentity).getCode();
+        verify(messageIdentity, atLeast(1)).getLocale();
+        verify(messageIdentity).getModule();
+        verify(messageIdentity).getTenant();
+    }
+
+    @Test
+    void testDelete9() {
+        doNothing().when(messageRepository).delete((String) any(), (String) any(), (String) any(), (List<String>) any());
+        doNothing().when(messageCacheRepository).bustCacheEntry((String) any(), (Tenant) any());
+        MessageIdentity messageIdentity = mock(MessageIdentity.class);
+        when(messageIdentity.getCode()).thenReturn("Code");
+        when(messageIdentity.getModule()).thenReturn("Module");
+        when(messageIdentity.getLocale()).thenReturn("en");
+        when(messageIdentity.getTenant()).thenReturn(new Tenant("42"));
+        MessageIdentity messageIdentity1 = mock(MessageIdentity.class);
+        when(messageIdentity1.getCode()).thenReturn("Code");
+        when(messageIdentity1.getModule()).thenReturn("Module");
+        when(messageIdentity1.getLocale()).thenReturn("en");
+        when(messageIdentity1.getTenant()).thenReturn(new Tenant("42"));
+        Tenant tenant = mock(Tenant.class);
+        when(tenant.getTenantId()).thenReturn("42");
+        MessageIdentity messageIdentity2 = mock(MessageIdentity.class);
+        when(messageIdentity2.getCode()).thenReturn("Code");
+        when(messageIdentity2.getModule()).thenReturn("foo");
+        when(messageIdentity2.getLocale()).thenReturn("en");
+        when(messageIdentity2.getTenant()).thenReturn(tenant);
+
+        ArrayList<MessageIdentity> messageIdentityList = new ArrayList<>();
+        messageIdentityList.add(messageIdentity2);
+        messageIdentityList.add(messageIdentity1);
+        messageIdentityList.add(messageIdentity);
+        messageService.delete(messageIdentityList);
+        verify(messageRepository, atLeast(1)).delete((String) any(), (String) any(), (String) any(),
+            (List<String>) any());
+        verify(messageCacheRepository, atLeast(1)).bustCacheEntry((String) any(), (Tenant) any());
+        verify(messageIdentity2).getCode();
+        verify(messageIdentity2, atLeast(1)).getLocale();
+        verify(messageIdentity2).getModule();
+        verify(messageIdentity2).getTenant();
+        verify(tenant).getTenantId();
+        verify(messageIdentity1).getCode();
+        verify(messageIdentity1, atLeast(1)).getLocale();
+        verify(messageIdentity1).getModule();
+        verify(messageIdentity1).getTenant();
+        verify(messageIdentity).getCode();
+        verify(messageIdentity, atLeast(1)).getLocale();
+        verify(messageIdentity).getModule();
+        verify(messageIdentity).getTenant();
     }
 
     @Test

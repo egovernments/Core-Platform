@@ -1,10 +1,9 @@
 package org.egov.domain.model;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 public class TenantTest {
 
@@ -13,7 +12,7 @@ public class TenantTest {
         final Tenant tenant1 = new Tenant("tenant1");
         final Tenant tenant2 = new Tenant("tenant1");
 
-        assertTrue(tenant1.equals(tenant2));
+        Assertions.assertTrue(tenant1.equals(tenant2));
     }
 
     @Test
@@ -21,7 +20,7 @@ public class TenantTest {
         final Tenant tenant1 = new Tenant("tenant1");
         final Tenant tenant2 = new Tenant("tenant1");
 
-        assertEquals(tenant1.hashCode(), tenant2.hashCode());
+        Assertions.assertEquals(tenant1.hashCode(), tenant2.hashCode());
     }
 
     @Test
@@ -29,7 +28,7 @@ public class TenantTest {
         final Tenant tenant1 = new Tenant("tenant1");
         final Tenant tenant2 = new Tenant("tenant2");
 
-        assertFalse(tenant1.equals(tenant2));
+        Assertions.assertFalse(tenant1.equals(tenant2));
     }
 
     @Test
@@ -37,7 +36,7 @@ public class TenantTest {
         final Tenant tenant1 = new Tenant("tenant1");
         final Tenant tenant2 = new Tenant("tenant2");
 
-        assertNotEquals(tenant1.hashCode(), tenant2.hashCode());
+        Assertions.assertNotEquals(tenant1.hashCode(), tenant2.hashCode());
     }
 
     @Test
@@ -46,12 +45,12 @@ public class TenantTest {
 
         final List<Tenant> tenantHierarchyList = tenant.getTenantHierarchy();
 
-        assertEquals(5, tenantHierarchyList.size());
-        assertEquals(new Tenant("a.b.c.d"), tenantHierarchyList.get(0));
-        assertEquals(new Tenant("a.b.c"), tenantHierarchyList.get(1));
-        assertEquals(new Tenant("a.b"), tenantHierarchyList.get(2));
-        assertEquals(new Tenant("a"), tenantHierarchyList.get(3));
-        assertEquals(new Tenant("default"), tenantHierarchyList.get(4));
+        Assertions.assertEquals(5, tenantHierarchyList.size());
+        Assertions.assertEquals(new Tenant("a.b.c.d"), tenantHierarchyList.get(0));
+        Assertions.assertEquals(new Tenant("a.b.c"), tenantHierarchyList.get(1));
+        Assertions.assertEquals(new Tenant("a.b"), tenantHierarchyList.get(2));
+        Assertions.assertEquals(new Tenant("a"), tenantHierarchyList.get(3));
+        Assertions.assertEquals(new Tenant("default"), tenantHierarchyList.get(4));
     }
 
     @Test
@@ -60,51 +59,51 @@ public class TenantTest {
 
         final List<Tenant> tenantHierarchyList = tenant.getTenantHierarchy();
 
-        assertEquals(2, tenantHierarchyList.size());
-        assertEquals(new Tenant("a"), tenantHierarchyList.get(0));
-        assertEquals(new Tenant("default"), tenantHierarchyList.get(1));
+        Assertions.assertEquals(2, tenantHierarchyList.size());
+        Assertions.assertEquals(new Tenant("a"), tenantHierarchyList.get(0));
+        Assertions.assertEquals(new Tenant("default"), tenantHierarchyList.get(1));
     }
 
     @Test
     public void test_is_default_tenant_should_return_true_when_tenant_is_default() {
         final Tenant tenant = new Tenant("default");
 
-        assertTrue(tenant.isDefaultTenant());
+        Assertions.assertTrue(tenant.isDefaultTenant());
     }
 
     @Test
     public void test_is_default_tenant_should_return_false_when_tenant_is_not_default() {
         final Tenant tenant = new Tenant("a.b.c");
 
-        assertFalse(tenant.isDefaultTenant());
+        Assertions.assertFalse(tenant.isDefaultTenant());
     }
 
     @Test
     public void test_is_more_specific_compared_to_should_return_false_when_other_tenant_has_same_id() {
         final Tenant tenant = new Tenant("a.b.c");
 
-        assertFalse(tenant.isMoreSpecificComparedTo(new Tenant("a.b.c")));
+        Assertions.assertFalse(tenant.isMoreSpecificComparedTo(new Tenant("a.b.c")));
     }
 
     @Test
     public void test_is_more_specific_compared_to_should_return_false_when_other_tenant_is_more_specific_in_hierarchy() {
         final Tenant tenant = new Tenant("a.b.c");
 
-        assertFalse(tenant.isMoreSpecificComparedTo(new Tenant("a.b.c.d")));
+        Assertions.assertFalse(tenant.isMoreSpecificComparedTo(new Tenant("a.b.c.d")));
     }
 
     @Test
     public void test_is_more_specific_compared_to_should_return_false_when_other_tenant_is_of_different_hierarchy() {
         final Tenant tenant = new Tenant("a.b.c");
 
-        assertFalse(tenant.isMoreSpecificComparedTo(new Tenant("d.e")));
+        Assertions.assertFalse(tenant.isMoreSpecificComparedTo(new Tenant("d.e")));
     }
 
     @Test
     public void test_is_more_specific_compared_to_should_return_true_when_other_tenant_is_less_specific_in_hierarchy() {
         final Tenant tenant = new Tenant("a.b.c.d");
 
-        assertTrue(tenant.isMoreSpecificComparedTo(new Tenant("a.b")));
+        Assertions.assertTrue(tenant.isMoreSpecificComparedTo(new Tenant("a.b")));
     }
 
 }

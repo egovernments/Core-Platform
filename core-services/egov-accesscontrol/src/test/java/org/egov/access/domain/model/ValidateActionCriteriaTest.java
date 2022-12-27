@@ -1,11 +1,10 @@
 package org.egov.access.domain.model;
 
 import org.egov.access.domain.criteria.ValidateActionCriteria;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
 
 public class ValidateActionCriteriaTest {
 
@@ -14,8 +13,8 @@ public class ValidateActionCriteriaTest {
 		ValidateActionCriteria validateActionCriteria = ValidateActionCriteria.builder()
 				.roleNames(Arrays.asList("role1, role2")).tenantId("tenant").actionUrl("url").build();
 
-		assertEquals(Arrays.asList("role1, role2"), validateActionCriteria.getRoleNames());
-		assertEquals("tenant", validateActionCriteria.getTenantId());
-		assertEquals("url", validateActionCriteria.getActionUrl());
+		Assertions.assertEquals(Arrays.asList("role1, role2"), validateActionCriteria.getRoleNames());
+		Assertions.assertEquals("tenant", validateActionCriteria.getTenantId());
+		Assertions.assertEquals("url", validateActionCriteria.getActionUrl());
 	}
 }

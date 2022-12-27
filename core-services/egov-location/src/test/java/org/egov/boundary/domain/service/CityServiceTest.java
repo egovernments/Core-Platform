@@ -1,18 +1,18 @@
 package org.egov.boundary.domain.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
-
 import org.egov.boundary.persistence.repository.CityRepository;
 import org.egov.boundary.web.contract.City;
 import org.egov.boundary.web.contract.CityRequest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
 public class CityServiceTest {
 
 	@Mock
@@ -32,7 +32,7 @@ public class CityServiceTest {
 
 		City city = cityService.getCityByCityReq(cityRequestForCityId);
 
-		assertEquals("0001", city.getCode());
+		Assertions.assertEquals("0001", city.getCode());
 
 	}
 
@@ -46,7 +46,7 @@ public class CityServiceTest {
 
 		City city = cityService.getCityByCityReq(cityRequestForCityCode);
 
-		assertEquals("0001", city.getCode());
+		Assertions.assertEquals("0001", city.getCode());
 
 	}
 

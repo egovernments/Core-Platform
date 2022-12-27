@@ -2,12 +2,11 @@ package org.egov.persistence.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.egov.domain.model.Tenant;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
@@ -18,7 +17,7 @@ import java.util.List;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MessageCacheRepositoryTest {
 
     private static final String MESSAGE_HASH_KEY = "messages";
@@ -31,7 +30,7 @@ public class MessageCacheRepositoryTest {
 
     private MessageCacheRepository cacheRepository;
 
-    @Before
+    @BeforeEach
     public void before() {
         when(stringRedisTemplate.opsForHash()).thenReturn(hashOperations);
         cacheRepository = new MessageCacheRepository(stringRedisTemplate, new ObjectMapper());

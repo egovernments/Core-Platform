@@ -1,12 +1,5 @@
 package org.egov.access.domain.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.egov.access.domain.criteria.RoleSearchCriteria;
 import org.egov.access.domain.model.Role;
 import org.egov.access.persistence.repository.BaseRepository;
@@ -16,16 +9,23 @@ import org.egov.access.persistence.repository.rowmapper.RoleRowMapper;
 import org.egov.access.web.contract.role.RoleRequest;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-@RunWith(MockitoJUnitRunner.class)
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
 public class RoleServiceTest {
 
 	@Mock
@@ -42,7 +42,7 @@ public class RoleServiceTest {
 	@Mock
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplat;
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		roleService = new RoleService(repository, roleRepository);
@@ -57,7 +57,7 @@ public class RoleServiceTest {
 				.thenReturn(expectedRoles);
 
 		List<Role> actualActions = roleService.getRoles(roleSearchCriteria);
-		assertEquals(expectedRoles, actualActions);
+		Assertions.assertEquals(expectedRoles, actualActions);
 	}
 
 	private List<Object> getRoles() {

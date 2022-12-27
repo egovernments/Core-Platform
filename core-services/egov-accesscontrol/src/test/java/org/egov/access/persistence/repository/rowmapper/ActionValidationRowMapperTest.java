@@ -1,17 +1,17 @@
 package org.egov.access.persistence.repository.rowmapper;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ActionValidationRowMapperTest {
 	@Mock
 	private ResultSet resultSet;
@@ -23,6 +23,6 @@ public class ActionValidationRowMapperTest {
 		assert actionValidationRowMapper.mapRow(resultSet, 1).isAllowed();
 
 		when(resultSet.getBoolean("exists")).thenReturn(false);
-		assertFalse(actionValidationRowMapper.mapRow(resultSet, 1).isAllowed());
+		Assertions.assertFalse(actionValidationRowMapper.mapRow(resultSet, 1).isAllowed());
 	}
 }

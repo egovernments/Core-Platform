@@ -1,23 +1,21 @@
 package org.egov.boundary.domain.service;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
+import org.egov.boundary.domain.model.Boundary;
+import org.egov.boundary.persistence.repository.BoundaryRepository;
+import org.egov.boundary.web.contract.BoundaryType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.egov.boundary.domain.model.Boundary;
-import org.egov.boundary.persistence.repository.BoundaryRepository;
-import org.egov.boundary.web.contract.BoundaryType;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.transaction.annotation.Transactional;
+import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BoundaryServiceTest {
 
 	@Mock
@@ -31,7 +29,7 @@ public class BoundaryServiceTest {
 
 	private BoundaryService boundaryService;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		boundaryService = new BoundaryService(boundaryTypeService,
 				crossHierarchyService, boundaryRepository);

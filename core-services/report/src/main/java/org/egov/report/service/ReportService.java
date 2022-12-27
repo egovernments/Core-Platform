@@ -230,6 +230,8 @@ public class ReportService {
         if ((reportDefinition.getdecryptionPathId()!= null)&&(reportRequest.getRequestInfo()!=null)&&(reportRequest.getRequestInfo().getUserInfo()!=null))
         {
             try {
+//                maps = encryptionService.decryptJson(reportRequest.getRequestInfo(), maps,
+//                        reportDefinition.getdecryptionPathId(), "Retrieve Report Data", Map.class);
                 maps = encryptionService.decryptJson(reportRequest.getRequestInfo(), maps,
                         reportDefinition.getdecryptionPathId(), "Retrieve Report Data", Map.class);
             } catch (IOException e) {

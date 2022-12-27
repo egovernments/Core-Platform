@@ -1,9 +1,8 @@
 package org.egov.access.web.contract;
 
 import org.egov.access.web.contract.validateaction.ActionValidationContract;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ActionValidationContractTest {
 
@@ -11,6 +10,6 @@ public class ActionValidationContractTest {
 	public void testThatActionValidationContractContainsInfoAboutActionAllow() {
 		ActionValidationContract actionValidation = ActionValidationContract.builder().allowed("TRUE").build();
 
-		assertEquals("TRUE", actionValidation.getAllowed());
+		Assertions.assertEquals("TRUE", actionValidation.getAllowed());
 	}
 }

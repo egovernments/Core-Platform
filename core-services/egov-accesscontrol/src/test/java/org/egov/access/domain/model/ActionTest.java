@@ -1,8 +1,7 @@
 package org.egov.access.domain.model;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ActionTest {
 
@@ -13,8 +12,8 @@ public class ActionTest {
 		Action action2 = Action.builder().id(1L).name("Create Complaint").url("/createcomplaint")
 				.displayName("Create Complaint").serviceCode("test").build();
 
-		assertTrue(action1.equals(action2));
-		assertEquals(action1.hashCode(), action2.hashCode());
+		Assertions.assertTrue(action1.equals(action2));
+		Assertions.assertEquals(action1.hashCode(), action2.hashCode());
 	}
 
 	@Test
@@ -24,7 +23,7 @@ public class ActionTest {
 		Action action2 = Action.builder().id(2L).name("Update Complaint").url("/updatecomplaint")
 				.displayName("Update Complaint").serviceCode("test").build();
 
-		assertFalse(action1.equals(action2));
-		assertNotEquals(action1.hashCode(), action2.hashCode());
+		Assertions.assertFalse(action1.equals(action2));
+		Assertions.assertNotEquals(action1.hashCode(), action2.hashCode());
 	}
 }

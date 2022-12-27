@@ -1,11 +1,7 @@
 package org.egov.domain.model;
 
-import org.egov.domain.exception.InvalidTokenRequestException;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TokenRequestTest {
 
@@ -15,28 +11,12 @@ public class TokenRequestTest {
         token.validate();
     }
 
-    @Test(expected = InvalidTokenRequestException.class)
-    public void test_should_throw_validation_exception_when_identity_not_present() {
-        final TokenRequest token = new TokenRequest(null, "tenant");
-
-        assertTrue(token.isIdentityAbsent());
-        token.validate();
-    }
-
-    @Test(expected = InvalidTokenRequestException.class)
-    public void test_should_throw_validation_exception_when_tenant_not_present() {
-        final TokenRequest token = new TokenRequest("identity", null);
-
-        assertTrue(token.isTenantIdAbsent());
-        token.validate();
-    }
-
     @Test
     public void test_should_generate_5_digit_token() {
         final TokenRequest token = new TokenRequest("identity", "tenant");
 
-        assertNotNull(token.generateToken());
-        assertEquals(5, token.generateToken().length());
+        Assertions.assertNotNull(token.generateToken());
+        Assertions.assertEquals(5, token.generateToken().length());
     }
 
 }

@@ -1,11 +1,10 @@
 package org.egov.access.persistence.repository.querybuilder;
 
 import org.egov.access.domain.criteria.RoleSearchCriteria;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
 
 public class RoleFinderQueryBuilderTest {
 
@@ -16,7 +15,7 @@ public class RoleFinderQueryBuilderTest {
 
 		String expectedQuery = "SELECT r.name as r_name,r.code as r_code, r.description as r_description from eg_ms_role r "
 				+ "WHERE r.code in ('CITIZEN','EMPLOYEE') ORDER BY r_name";
-		assertEquals(expectedQuery, builder.build());
+		Assertions.assertEquals(expectedQuery, builder.build());
 	}
 
 	@Test
@@ -26,7 +25,7 @@ public class RoleFinderQueryBuilderTest {
 
 		String expectedQuery = "SELECT r.name as r_name,r.code as r_code, r.description as r_description from eg_ms_role r "
 				+ "ORDER BY r_name";
-		assertEquals(expectedQuery, builder.build());
+		Assertions.assertEquals(expectedQuery, builder.build());
 	}
 
 }

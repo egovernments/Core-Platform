@@ -5,13 +5,14 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.2.13.RELEASE</version>
+    <version>2.7.5</version>
   </parent>
   <groupId>org.egov</groupId>
   <artifactId>egov-enc-service</artifactId>
   <version>1.1.3</version>
   <name>egov-enc-service</name>
   <properties>
+    <kafka.version>3.1.1</kafka.version>
     <log4j2.version>2.17.1</log4j2.version>
     <java.version>1.8</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -22,7 +23,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-beans</artifactId>
-      <version>5.2.20.RELEASE</version>
+      <version>5.3.23</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
