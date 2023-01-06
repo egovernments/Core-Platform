@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.egov:enc-client:2.0.1-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/egov/enc-client/2.0.1-SNAPSHOT/enc-client-2.0.1-20221011.133502-4.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/egov/enc-client/2.0.1-SNAPSHOT/enc-client-2.0.1-20221011.133502-4-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/egov/enc-client/2.0.1-SNAPSHOT/enc-client-2.0.1-20221011.133502-4-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

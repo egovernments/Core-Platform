@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/Core-Platform.iml" filepath="$PROJECT_DIR$/.idea/Core-Platform.iml" />
+      <module fileurl="file://$PROJECT_DIR$/business-services/dashboard-analytics/analytics.iml" filepath="$PROJECT_DIR$/business-services/dashboard-analytics/analytics.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/audit-service/audit-service.iml" filepath="$PROJECT_DIR$/core-services/audit-service/audit-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/business-services/billing-service/billing-service.iml" filepath="$PROJECT_DIR$/business-services/billing-service/billing-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/chatbot/chatbot.iml" filepath="$PROJECT_DIR$/core-services/chatbot/chatbot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/business-services/collection-services/collection-services.iml" filepath="$PROJECT_DIR$/business-services/collection-services/collection-services.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/libraries/digit-models/digit-models.iml" filepath="$PROJECT_DIR$/core-services/libraries/digit-models/digit-models.iml" />
+      <module fileurl="file://$PROJECT_DIR$/business-services/egf-instrument/egf-instrument.iml" filepath="$PROJECT_DIR$/business-services/egf-instrument/egf-instrument.iml" />
+      <module fileurl="file://$PROJECT_DIR$/business-services/egf-master/egf-master.iml" filepath="$PROJECT_DIR$/business-services/egf-master/egf-master.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-accesscontrol/egov-accesscontrol.iml" filepath="$PROJECT_DIR$/core-services/egov-accesscontrol/egov-accesscontrol.iml" />
+      <module fileurl="file://$PROJECT_DIR$/business-services/egov-apportion-service/egov-apportion-service.iml" filepath="$PROJECT_DIR$/business-services/egov-apportion-service/egov-apportion-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-common-masters/egov-common-masters.iml" filepath="$PROJECT_DIR$/core-services/egov-common-masters/egov-common-masters.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-data-uploader/egov-data-uploader.iml" filepath="$PROJECT_DIR$/core-services/egov-data-uploader/egov-data-uploader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-document-uploader/egov-document-uploader.iml" filepath="$PROJECT_DIR$/core-services/egov-document-uploader/egov-document-uploader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-enc-service/egov-enc-service.iml" filepath="$PROJECT_DIR$/core-services/egov-enc-service/egov-enc-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-filestore/egov-filestore.iml" filepath="$PROJECT_DIR$/core-services/egov-filestore/egov-filestore.iml" />
+      <module fileurl="file://$PROJECT_DIR$/business-services/egov-hrms/egov-hrms.iml" filepath="$PROJECT_DIR$/business-services/egov-hrms/egov-hrms.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-idgen/egov-idgen.iml" filepath="$PROJECT_DIR$/core-services/egov-idgen/egov-idgen.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-indexer/egov-indexer.iml" filepath="$PROJECT_DIR$/core-services/egov-indexer/egov-indexer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-localization/egov-localization.iml" filepath="$PROJECT_DIR$/core-services/egov-localization/egov-localization.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-location/egov-location.iml" filepath="$PROJECT_DIR$/core-services/egov-location/egov-location.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-mdms-service/egov-mdms-service-test.iml" filepath="$PROJECT_DIR$/core-services/egov-mdms-service/egov-mdms-service-test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/national-dashboard-ingest/egov-national-dashboard-ingest.iml" filepath="$PROJECT_DIR$/core-services/national-dashboard-ingest/egov-national-dashboard-ingest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-notification-mail/egov-notification-mail.iml" filepath="$PROJECT_DIR$/core-services/egov-notification-mail/egov-notification-mail.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-notification-sms/egov-notification-sms.iml" filepath="$PROJECT_DIR$/core-services/egov-notification-sms/egov-notification-sms.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-otp/egov-otp.iml" filepath="$PROJECT_DIR$/core-services/egov-otp/egov-otp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-persister/egov-persister.iml" filepath="$PROJECT_DIR$/core-services/egov-persister/egov-persister.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-pg-service/egov-pg-service.iml" filepath="$PROJECT_DIR$/core-services/egov-pg-service/egov-pg-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-searcher/egov-searcher.iml" filepath="$PROJECT_DIR$/core-services/egov-searcher/egov-searcher.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-telemetry/egov-telemetry-batch-process/egov-telemetry-batch-process.iml" filepath="$PROJECT_DIR$/core-services/egov-telemetry/egov-telemetry-batch-process/egov-telemetry-batch-process.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-telemetry/egov-telemetry-kafka-streams/egov-telemetry-kafka-streams.iml" filepath="$PROJECT_DIR$/core-services/egov-telemetry/egov-telemetry-kafka-streams/egov-telemetry-kafka-streams.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-url-shortening/egov-url-shortening.iml" filepath="$PROJECT_DIR$/core-services/egov-url-shortening/egov-url-shortening.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-user/egov-user.iml" filepath="$PROJECT_DIR$/core-services/egov-user/egov-user.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/egov-workflow-v2/egov-workflow-v2.iml" filepath="$PROJECT_DIR$/core-services/egov-workflow-v2/egov-workflow-v2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/libraries/enc-client/enc-client.iml" filepath="$PROJECT_DIR$/core-services/libraries/enc-client/enc-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/business-services/finance-collections-voucher-consumer/finance-collections-voucher-consumer.iml" filepath="$PROJECT_DIR$/business-services/finance-collections-voucher-consumer/finance-collections-voucher-consumer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/business-services/dashboard-ingest/ingestpipeline.iml" filepath="$PROJECT_DIR$/business-services/dashboard-ingest/ingestpipeline.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/internal-gateway/internal-gateway.iml" filepath="$PROJECT_DIR$/core-services/internal-gateway/internal-gateway.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/libraries/mdms-client/mdms-client.iml" filepath="$PROJECT_DIR$/core-services/libraries/mdms-client/mdms-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/national-dashboard-kafka-pipeline/national-dashboard-kafka-pipeline.iml" filepath="$PROJECT_DIR$/core-services/national-dashboard-kafka-pipeline/national-dashboard-kafka-pipeline.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/report/report.iml" filepath="$PROJECT_DIR$/core-services/report/report.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/libraries/services-common/services-common.iml" filepath="$PROJECT_DIR$/core-services/libraries/services-common/services-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/tenant/tenant.iml" filepath="$PROJECT_DIR$/core-services/tenant/tenant.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/libraries/tracer/tracer.iml" filepath="$PROJECT_DIR$/core-services/libraries/tracer/tracer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/user-otp/user-otp.iml" filepath="$PROJECT_DIR$/core-services/user-otp/user-otp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-services/zuul/zuul.iml" filepath="$PROJECT_DIR$/core-services/zuul/zuul.iml" />
+    </modules>
+  </component>
+</project>

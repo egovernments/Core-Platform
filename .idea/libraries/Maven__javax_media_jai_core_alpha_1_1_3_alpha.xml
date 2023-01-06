@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: javax.media:jai_core:alpha:1.1.3-alpha">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/javax/media/jai_core/1.1.3-alpha/jai_core-1.1.3-alpha-alpha.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/javax/media/jai_core/1.1.3-alpha/jai_core-1.1.3-alpha-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/javax/media/jai_core/1.1.3-alpha/jai_core-1.1.3-alpha-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

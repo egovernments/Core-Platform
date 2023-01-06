@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.egov:mdms-client:0.0.3-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/egov/mdms-client/0.0.3-SNAPSHOT/mdms-client-0.0.3-20180820.135333-3.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/egov/mdms-client/0.0.3-SNAPSHOT/mdms-client-0.0.3-20180820.135333-3-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/egov/mdms-client/0.0.3-SNAPSHOT/mdms-client-0.0.3-20180820.135333-3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

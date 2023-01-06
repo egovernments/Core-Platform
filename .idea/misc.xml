@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/core-services/zuul/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/report/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/tenant/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/chatbot/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-otp/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/user-otp/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-user/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/libraries/tracer/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/libraries/enc-client/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/libraries/mdms-client/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/libraries/digit-models/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/libraries/services-common/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-idgen/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-indexer/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/audit-service/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-location/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-searcher/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-filestore/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-persister/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-telemetry/egov-telemetry-batch-process/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-telemetry/egov-telemetry-kafka-streams/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-pg-service/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-enc-service/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-workflow-v2/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/internal-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-localization/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-mdms-service/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-accesscontrol/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-data-uploader/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-common-masters/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-url-shortening/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-notification-sms/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-document-uploader/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/egov-notification-mail/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/national-dashboard-ingest/pom.xml" />
+        <option value="$PROJECT_DIR$/core-services/national-dashboard-kafka-pipeline/pom.xml" />
+        <option value="$PROJECT_DIR$/business-services/egov-hrms/pom.xml" />
+        <option value="$PROJECT_DIR$/business-services/egf-master/pom.xml" />
+        <option value="$PROJECT_DIR$/business-services/egf-instrument/pom.xml" />
+        <option value="$PROJECT_DIR$/business-services/billing-service/pom.xml" />
+        <option value="$PROJECT_DIR$/business-services/dashboard-ingest/pom.xml" />
+        <option value="$PROJECT_DIR$/business-services/collection-services/pom.xml" />
+        <option value="$PROJECT_DIR$/business-services/dashboard-analytics/pom.xml" />
+        <option value="$PROJECT_DIR$/business-services/egov-apportion-service/pom.xml" />
+        <option value="$PROJECT_DIR$/business-services/finance-collections-voucher-consumer/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK" />
+</project>

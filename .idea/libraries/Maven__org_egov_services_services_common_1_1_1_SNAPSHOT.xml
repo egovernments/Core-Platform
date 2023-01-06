@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.egov.services:services-common:1.1.1-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/egov/services/services-common/1.1.1-SNAPSHOT/services-common-1.1.1-20220715.113318-1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/egov/services/services-common/1.1.1-SNAPSHOT/services-common-1.1.1-20220715.113318-1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/egov/services/services-common/1.1.1-SNAPSHOT/services-common-1.1.1-20220715.113318-1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

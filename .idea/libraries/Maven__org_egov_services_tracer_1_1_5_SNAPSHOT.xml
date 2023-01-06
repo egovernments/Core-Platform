@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.egov.services:tracer:1.1.5-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/egov/services/tracer/1.1.5-SNAPSHOT/tracer-1.1.5-20220707.130633-19.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/egov/services/tracer/1.1.5-SNAPSHOT/tracer-1.1.5-20220707.130633-19-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/egov/services/tracer/1.1.5-SNAPSHOT/tracer-1.1.5-20220707.130633-19-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="egov-hrms" />
+        <module name="egov-apportion-service" />
+        <module name="egov-enc-service" />
+        <module name="finance-collections-voucher-consumer" />
+        <module name="national-dashboard-kafka-pipeline" />
+        <module name="ingestpipeline" />
+        <module name="billing-service" />
+        <module name="egov-otp" />
+        <module name="analytics" />
+        <module name="egov-accesscontrol" />
+        <module name="egov-idgen" />
+        <module name="egov-data-uploader" />
+        <module name="digit-models" />
+        <module name="egov-filestore" />
+        <module name="egov-pg-service" />
+        <module name="egov-notification-sms" />
+        <module name="egov-common-masters" />
+        <module name="egov-telemetry-kafka-streams" />
+        <module name="internal-gateway" />
+        <module name="egov-telemetry-batch-process" />
+        <module name="egov-url-shortening" />
+        <module name="egov-indexer" />
+        <module name="tenant" />
+        <module name="enc-client" />
+        <module name="chatbot" />
+        <module name="services-common" />
+        <module name="egov-notification-mail" />
+        <module name="user-otp" />
+        <module name="audit-service" />
+        <module name="egov-persister" />
+        <module name="egov-localization" />
+        <module name="zuul" />
+        <module name="tracer" />
+        <module name="egov-workflow-v2" />
+        <module name="egf-instrument" />
+        <module name="collection-services" />
+        <module name="egov-searcher" />
+        <module name="egf-master" />
+        <module name="egov-national-dashboard-ingest" />
+        <module name="egov-user" />
+        <module name="egov-mdms-service-test" />
+        <module name="report" />
+        <module name="egov-document-uploader" />
+        <module name="egov-location" />
+        <module name="mdms-client" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="analytics" target="1.8" />
+      <module name="audit-service" target="1.8" />
+      <module name="billing-service" target="1.8" />
+      <module name="chatbot" target="1.8" />
+      <module name="collection-services" target="1.8" />
+      <module name="digit-models" target="1.8" />
+      <module name="egf-instrument" target="1.8" />
+      <module name="egf-master" target="1.8" />
+      <module name="egov-accesscontrol" target="1.8" />
+      <module name="egov-apportion-service" target="1.8" />
+      <module name="egov-common-masters" target="1.8" />
+      <module name="egov-data-uploader" target="1.8" />
+      <module name="egov-document-uploader" target="1.8" />
+      <module name="egov-enc-service" target="1.8" />
+      <module name="egov-filestore" target="1.8" />
+      <module name="egov-hrms" target="1.8" />
+      <module name="egov-idgen" target="1.8" />
+      <module name="egov-indexer" target="1.8" />
+      <module name="egov-localization" target="1.8" />
+      <module name="egov-location" target="1.8" />
+      <module name="egov-mdms-service-test" target="1.8" />
+      <module name="egov-national-dashboard-ingest" target="1.8" />
+      <module name="egov-notification-mail" target="1.8" />
+      <module name="egov-notification-sms" target="1.8" />
+      <module name="egov-otp" target="1.8" />
+      <module name="egov-persister" target="1.8" />
+      <module name="egov-pg-service" target="1.8" />
+      <module name="egov-searcher" target="1.8" />
+      <module name="egov-telemetry-batch-process" target="1.8" />
+      <module name="egov-telemetry-kafka-streams" target="1.8" />
+      <module name="egov-url-shortening" target="1.8" />
+      <module name="egov-user" target="1.8" />
+      <module name="egov-workflow-v2" target="1.8" />
+      <module name="enc-client" target="1.8" />
+      <module name="finance-collections-voucher-consumer" target="1.8" />
+      <module name="ingestpipeline" target="1.8" />
+      <module name="internal-gateway" target="1.8" />
+      <module name="mdms-client" target="1.8" />
+      <module name="national-dashboard-kafka-pipeline" target="1.8" />
+      <module name="report" target="1.8" />
+      <module name="services-common" target="1.8" />
+      <module name="tenant" target="1.8" />
+      <module name="tracer" target="1.8" />
+      <module name="user-otp" target="1.8" />
+      <module name="zuul" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="audit-service" options="-parameters" />
+      <module name="billing-service" options="-parameters" />
+      <module name="chatbot" options="-parameters" />
+      <module name="egf-instrument" options="-parameters" />
+      <module name="egf-master" options="-parameters" />
+      <module name="egov-accesscontrol" options="-parameters" />
+      <module name="egov-document-uploader" options="-parameters" />
+      <module name="egov-enc-service" options="-parameters" />
+      <module name="egov-filestore" options="-parameters" />
+      <module name="egov-hrms" options="-parameters" />
+      <module name="egov-idgen" options="-parameters" />
+      <module name="egov-indexer" options="-parameters" />
+      <module name="egov-localization" options="-parameters" />
+      <module name="egov-location" options="-parameters" />
+      <module name="egov-mdms-service-test" options="-parameters" />
+      <module name="egov-national-dashboard-ingest" options="-parameters" />
+      <module name="egov-notification-mail" options="-parameters" />
+      <module name="egov-notification-sms" options="-parameters" />
+      <module name="egov-otp" options="-parameters" />
+      <module name="egov-persister" options="-parameters" />
+      <module name="egov-pg-service" options="-parameters" />
+      <module name="egov-searcher" options="-parameters" />
+      <module name="egov-url-shortening" options="-parameters" />
+      <module name="egov-workflow-v2" options="-parameters" />
+      <module name="enc-client" options="-parameters" />
+      <module name="internal-gateway" options="-parameters" />
+      <module name="national-dashboard-kafka-pipeline" options="-parameters" />
+      <module name="report" options="-parameters" />
+      <module name="tracer" options="-parameters" />
+      <module name="user-otp" options="-parameters" />
+      <module name="zuul" options="-parameters" />
+    </option>
+  </component>
+</project>
