@@ -1,12 +1,7 @@
 package org.egov.web.notification.mail.consumer.contract;
 
+import lombok.*;
 import org.egov.common.contract.request.RequestInfo;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,6 +10,8 @@ import lombok.Setter;
 @Getter
 public class EmailRequest {
     private RequestInfo requestInfo;
-    
-    private Email email;
+
+    //private Email email;
+
+    private EventNotificationPojo eventNotificationPojo;
 }

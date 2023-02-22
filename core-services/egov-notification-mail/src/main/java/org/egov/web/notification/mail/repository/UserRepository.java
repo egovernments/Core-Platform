@@ -32,10 +32,10 @@ public class UserRepository {
 		this.objectMapper = objectMapper;
 	}
 
-	public List<String> getEmailsByMobileNo(String tenantId, String mobileNo) {
+	public List<String> getEmailsByUuid(String tenantId, List<String> Uuid) {
 		List<String> emails = null;
 		try {
-			String rcvData = objectMapper.writeValueAsString(fetchUser(tenantId, mobileNo));
+			String rcvData = objectMapper.writeValueAsString(fetchUser(tenantId, Uuid));
 			Object document = Configuration.defaultConfiguration().jsonProvider().parse(rcvData);
 			emails = JsonPath.read(document, "$.user[?(@.emailId != null)].emailId");
 		} catch (IllegalArgumentException e) {
@@ -47,7 +47,28 @@ public class UserRepository {
 		return emails;
 	}
 
-	private Object fetchUser(String tenantId, String mobileNo) {
+	public List<String> getEmailsByMobileNo(String tenantId, String mobileNo) {
+		List<String> emails = null;
+		try {
+			String rcvData = objectMapper.writeValueAsString(fetchUserByMobile(tenantId, mobileNo));
+			Object document = Configuration.defaultConfiguration().jsonProvider().parse(rcvData);
+			emails = JsonPath.read(document, "$.user[?(@.emailId != null)].emailId");
+		} catch (IllegalArgumentException e) {
+			throw new CustomException("IllegalArgumentException", "ObjectMapper not able to convertValue in userCall");
+		} catch (JsonProcessingException e) {
+			throw new CustomException("EMAIL_NOTIFICATION_USER_SEARCH_FAILED",
+					"Deserialization failed, for user response");
+		}
+		return emails;
+	}
+
+	public Object fetchUser(String tenantId, List<String> Uuid) {
+		String url = config.getUserHost().concat(config.getUserContextPath()).concat(config.getUserSearchEndpoint());
+		UserSearchRequest searchRequest = UserSearchRequest.builder().uuid(Uuid).tenantId(tenantId).build();
+		return serviceRequestRepository.fetchResult(new StringBuilder(url), searchRequest);
+	}
+
+	private Object fetchUserByMobile(String tenantId, String mobileNo) {
 		String url = config.getUserHost().concat(config.getUserContextPath()).concat(config.getUserSearchEndpoint());
 		UserSearchRequest searchRequest = UserSearchRequest.builder().mobileNumber(mobileNo).tenantId(tenantId).build();
 		return serviceRequestRepository.fetchResult(new StringBuilder(url), searchRequest);
