@@ -18,13 +18,13 @@
 # -
 config:
 # Business Services
-  - name: "builds/Core-Platform/business-services/billing-service"
+  - name: "builds/Core-Platform/business-services/billing-service-partition"
     build:
-      - work-dir: "business-services/billing-service"
-        image-name: "billing-service"
+      - work-dir: "business-services/billing-service-partition"
+        image-name: "billing-service-partition"
         dockerfile: "build/maven/Dockerfile"
-      - work-dir: "business-services/billing-service/src/main/resources/db"
-        image-name: "billing-service-db"
+      - work-dir: "business-services/billing-service-partition/src/main/resources/db"
+        image-name: "billing-service-partition-db"
 
   - name: "builds/Core-Platform/business-services/collection-services"
     build:
