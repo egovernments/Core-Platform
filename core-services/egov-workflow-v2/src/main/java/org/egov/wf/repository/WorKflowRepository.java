@@ -148,6 +148,14 @@ public class WorKflowRepository {
         List<Object> preparedStmtList = new ArrayList<>();
         String query = queryBuilder.getProcessInstanceIds(criteria,preparedStmtList);
         query = util.replaceSchemaPlaceholder(query, criteria.getTenantId());
+
+
+        if(criteria.getIsHistory()) {
+            query = query.replace("{_IS_HISTORY}", "_history");
+        } else {
+            query = query.replace("{_IS_HISTORY}", "");
+        }
+
         log.info(query);
         log.info(preparedStmtList.toString());
         return jdbcTemplate.query(query, preparedStmtList.toArray(), new SingleColumnRowMapper<>(String.class));

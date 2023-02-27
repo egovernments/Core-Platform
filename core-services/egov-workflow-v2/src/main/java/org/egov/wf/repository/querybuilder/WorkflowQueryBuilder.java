@@ -45,7 +45,7 @@ public class WorkflowQueryBuilder {
             + "       {SCHEMA}.eg_wf_action_v2 ac ON ac.currentState = st.uuid AND ac.active=TRUE " + "       WHERE ";
 
 
-    private static final String WITH_CLAUSE = " select id from {SCHEMA}.eg_wf_processinstance_v2 pi_outer WHERE " ;
+    private static final String WITH_CLAUSE = " select id from {SCHEMA}.eg_wf_processinstance_v2{_IS_HISTORY} pi_outer WHERE " ;
 
     private static final String STATUS_COUNT_WRAPPER = "select  count(DISTINCT wf_id),cq.applicationStatus,cq.businessservice,cq.PI_STATUS as statusId from ({INTERNAL_QUERY}) as cq GROUP BY cq.applicationStatus,cq.businessservice,cq.PI_STATUS";
 
