@@ -11,6 +11,7 @@ import org.egov.persistence.repository.OtpEmailRepository;
 import org.egov.persistence.repository.OtpRepository;
 import org.egov.persistence.repository.OtpSMSRepository;
 import org.egov.persistence.repository.UserRepository;
+import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,6 +53,13 @@ public class OtpService {
 
         final String otpNumber = otpRepository.fetchOtp(otpRequest);
         otpSMSSender.send(otpRequest, otpNumber);
+        if(!otpRequest.isRegistrationRequestType()) // Because new user doesn't have any email configured
+            try{
+                otpEmailRepository.send(matchingUser.getEmail(), otpNumber, otpRequest);
+            } catch (Exception ignore){
+                log.warn("Could not send OTP over email");
+            }
+
     }
 
     private void sendOtpForPasswordReset(OtpRequest otpRequest) {
@@ -66,7 +74,11 @@ public class OtpService {
             final String otpNumber = otpRepository.fetchOtp(otpRequest);
             otpRequest.setMobileNumber(matchingUser.getMobileNumber());
             otpSMSSender.send(otpRequest, otpNumber);
-            otpEmailRepository.send(matchingUser.getEmail(), otpNumber);
+            try {
+                otpEmailRepository.send(matchingUser.getEmail(), otpNumber, otpRequest);
+            } catch (Exception ignore){
+                log.warn("Could not send OTP over email");
+            }
         } catch (Exception e) {
             log.error("Exception while fetching otp: ", e);
         }

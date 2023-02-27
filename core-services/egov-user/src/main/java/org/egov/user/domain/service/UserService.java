@@ -429,8 +429,15 @@ public class UserService {
         updatedUser = encryptionDecryptionUtil.decryptObject(updatedUser, "UserSelf", User.class, requestInfo);
 
         setFileStoreUrlsByFileStoreIds(Collections.singletonList(updatedUser));
-        if(!(updatedUser.getEmailId().equalsIgnoreCase(existingUser.getEmailId()))){
-            notificationUtil.sendEmail(requestInfo, existingUser, updatedUser);
+        String oldEmail = existingUser.getEmailId();
+        String newEmail = updatedUser.getEmailId();
+        if((oldEmail != null && !oldEmail.isEmpty()) && newEmail != null && !(newEmail.equalsIgnoreCase(oldEmail))) {
+            // Sending sms and email to old email to notify that email has been changed
+            try {
+                notificationUtil.sendEmail(requestInfo, existingUser, updatedUser);
+            } catch (Exception ignore){
+                log.error("Not able to send email");
+            }
         }
         return updatedUser;
     }
@@ -483,7 +490,7 @@ public class UserService {
         /* encrypt here */
         /* encrypted value is stored in DB*/
         user = encryptionDecryptionUtil.encryptObject(user, "User", User.class);
-        userRepository.update(user, user,requestInfo.getUserInfo().getId() , requestInfo.getUserInfo().getUuid());
+        userRepository.update(user, user,user.getId() , user.getUuid());
     }
 
 

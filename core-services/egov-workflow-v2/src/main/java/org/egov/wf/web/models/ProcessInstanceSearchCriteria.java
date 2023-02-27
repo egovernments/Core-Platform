@@ -29,6 +29,9 @@ public class ProcessInstanceSearchCriteria {
     @JsonProperty("history")
     private Boolean history = false;
 
+    @JsonProperty("isHistory")
+    private Boolean isHistory = false;
+
     @JsonProperty("fromDate")
     private Long fromDate = null;
 
