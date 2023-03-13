@@ -1,0 +1,98 @@
+openapi: 3.0.1
+info:
+  title: Whatsapp Chatbot service
+  description: APIs available to send user sent messages to Chatbot. These messages
+    can be text, image, missed call etc. This endpoint would be called by whatsapp
+    provider to forward user sent messages..
+  contact:
+    name: Abhishek Jain
+  version: 1.0.0
+servers:
+- url: /whatsapp-webhook
+paths:
+  /messages:
+    get:
+      tags:
+      - Chatbot
+      summary: Send user sent messages to Chatbot through GET request
+      description: Forward user sent message to Chatbot through GET request.
+      parameters:
+      - name: to
+        in: query
+        description: The receipient mobile number of message
+        required: true
+        schema:
+          type: string
+      - name: from
+        in: query
+        description: The sender mobile number of message
+        required: true
+        schema:
+          type: string
+      - name: media_type
+        in: query
+        description: Type of message ex:- text, image
+        required: true
+        schema:
+          type: string
+      - name: text
+        in: query
+        description: If media_type is "text" then the actual message would be picked
+          from this field
+        schema:
+          type: string
+      - name: media_data
+        in: query
+        description: media data if meda_type other than text
+        schema:
+          type: string
+      responses:
+        200:
+          description: message forwarded to chatbot sucessfully.
+          content: {}
+        400:
+          description: Error
+          content: {}
+    post:
+      tags:
+      - Chatbot
+      summary: Send user sent messages to Chatbot through POST request
+      description: Forward user sent message to Chatbot through POST request
+      parameters:
+      - name: to
+        in: query
+        description: The receipient mobile number of message
+        required: true
+        schema:
+          type: string
+      - name: from
+        in: query
+        description: The sender mobile number of message
+        required: true
+        schema:
+          type: string
+      - name: media_type
+        in: query
+        description: Type of message ex:- text, image
+        required: true
+        schema:
+          type: string
+      - name: text
+        in: query
+        description: If media_type is "text" then the actual message would be picked
+          from this field
+        schema:
+          type: string
+      - name: media_data
+        in: query
+        description: media data if meda_type other than text
+        schema:
+          type: string
+      responses:
+        200:
+          description: message forwarded to chatbot sucessfully.
+          content: {}
+        400:
+          description: Error
+          content: {}
+components: {}
