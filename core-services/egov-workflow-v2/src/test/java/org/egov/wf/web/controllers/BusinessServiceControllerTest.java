@@ -9,9 +9,10 @@ import java.util.ArrayList;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
-import org.egov.wf.service.BusinessMasterService;
+import org.egov.wf.service.V1.BusinessMasterServiceV1;
 import org.egov.wf.util.ResponseInfoFactory;
 import org.egov.wf.web.models.BusinessServiceRequest;
+import org.egov.wf.web.models.BusinessServiceSearchCriteria;
 import org.egov.wf.web.models.RequestInfoWrapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +21,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @ExtendWith(SpringExtension.class)
 class BusinessServiceControllerTest {
     @MockBean
-    private BusinessMasterService businessMasterService;
+    private BusinessMasterServiceV1 businessMasterServiceV1;
 
     @Autowired
     private BusinessServiceController businessServiceController;
@@ -41,12 +41,14 @@ class BusinessServiceControllerTest {
     @MockBean
     private ResponseInfoFactory responseInfoFactory;
 
-
-  //  @Test
+    /**
+     * Method under test: {@link BusinessServiceController#create(BusinessServiceRequest)}
+     */
+    @Test
     void testCreate() throws Exception {
-        when(this.responseInfoFactory.createResponseInfoFromRequestInfo((RequestInfo) any(), (Boolean) any()))
+        when(businessMasterServiceV1.create((BusinessServiceRequest) any())).thenReturn(new ArrayList<>());
+        when(responseInfoFactory.createResponseInfoFromRequestInfo((RequestInfo) any(), (Boolean) any()))
                 .thenReturn(new ResponseInfo());
-        when(this.businessMasterService.create((BusinessServiceRequest) any())).thenReturn(new ArrayList<>());
 
         BusinessServiceRequest businessServiceRequest = new BusinessServiceRequest();
         businessServiceRequest.setBusinessServices(new ArrayList<>());
@@ -55,7 +57,7 @@ class BusinessServiceControllerTest {
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/egov-wf/businessservice/_create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content);
-        MockMvcBuilders.standaloneSetup(this.businessServiceController)
+        MockMvcBuilders.standaloneSetup(businessServiceController)
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -66,12 +68,40 @@ class BusinessServiceControllerTest {
                                         + "\"BusinessServices\":[]}"));
     }
 
-
-   // @Test
-    void testUpdate() throws Exception {
-        when(this.responseInfoFactory.createResponseInfoFromRequestInfo((RequestInfo) any(), (Boolean) any()))
+    /**
+     * Method under test: {@link BusinessServiceController#search(BusinessServiceSearchCriteria, RequestInfoWrapper)}
+     */
+    @Test
+    void testSearch() throws Exception {
+        when(businessMasterServiceV1.search((BusinessServiceSearchCriteria) any())).thenReturn(new ArrayList<>());
+        when(responseInfoFactory.createResponseInfoFromRequestInfo((RequestInfo) any(), (Boolean) any()))
                 .thenReturn(new ResponseInfo());
-        when(this.businessMasterService.update((BusinessServiceRequest) any())).thenReturn(new ArrayList<>());
+
+        RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
+        requestInfoWrapper.setRequestInfo(new RequestInfo());
+        String content = (new ObjectMapper()).writeValueAsString(requestInfoWrapper);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/egov-wf/businessservice/_search")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
+        MockMvcBuilders.standaloneSetup(businessServiceController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"ResponseInfo\":{\"apiId\":null,\"ver\":null,\"ts\":null,\"resMsgId\":null,\"msgId\":null,\"status\":null},"
+                                        + "\"BusinessServices\":[]}"));
+    }
+
+    /**
+     * Method under test: {@link BusinessServiceController#update(BusinessServiceRequest)}
+     */
+    @Test
+    void testUpdate() throws Exception {
+        when(businessMasterServiceV1.update((BusinessServiceRequest) any())).thenReturn(new ArrayList<>());
+        when(responseInfoFactory.createResponseInfoFromRequestInfo((RequestInfo) any(), (Boolean) any()))
+                .thenReturn(new ResponseInfo());
 
         BusinessServiceRequest businessServiceRequest = new BusinessServiceRequest();
         businessServiceRequest.setBusinessServices(new ArrayList<>());
@@ -80,7 +110,7 @@ class BusinessServiceControllerTest {
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/egov-wf/businessservice/_update")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content);
-        MockMvcBuilders.standaloneSetup(this.businessServiceController)
+        MockMvcBuilders.standaloneSetup(businessServiceController)
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -89,21 +119,6 @@ class BusinessServiceControllerTest {
                         .string(
                                 "{\"ResponseInfo\":{\"apiId\":null,\"ver\":null,\"ts\":null,\"resMsgId\":null,\"msgId\":null,\"status\":null},"
                                         + "\"BusinessServices\":[]}"));
-    }
-
-
-   // @Test
-    void testSearch() throws Exception {
-        RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
-        requestInfoWrapper.setRequestInfo(new RequestInfo());
-        String content = (new ObjectMapper()).writeValueAsString(requestInfoWrapper);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/egov-wf/businessservice/_search")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content);
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(this.businessServiceController)
-                .build()
-                .perform(requestBuilder);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().is(200));
     }
 }
 
