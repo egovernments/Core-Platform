@@ -6,14 +6,10 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.egov.wf.service.WorkflowMigrationService;
 import org.egov.wf.service.WorkflowService;
 import org.egov.wf.util.ResponseInfoFactory;
-import org.egov.wf.web.models.ProcessInstance;
-import org.egov.wf.web.models.ProcessInstanceRequest;
-import org.egov.wf.web.models.ProcessInstanceResponse;
-import org.egov.wf.web.models.ProcessInstanceSearchCriteria;
-import org.egov.wf.web.models.RequestInfoWrapper;
-import org.egov.wf.web.models.StatusCountRequest;
+import org.egov.wf.web.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,15 +33,18 @@ public class WorkflowController {
 
     private final WorkflowService workflowService;
 
+    private final WorkflowMigrationService workflowMigrationService;
+
     private final ResponseInfoFactory responseInfoFactory;
 
 
     @Autowired
     public WorkflowController(ObjectMapper objectMapper, HttpServletRequest request,
-                              WorkflowService workflowService, ResponseInfoFactory responseInfoFactory) {
+                              WorkflowService workflowService, WorkflowMigrationService workflowMigrationService, ResponseInfoFactory responseInfoFactory) {
         this.objectMapper = objectMapper;
         this.request = request;
         this.workflowService = workflowService;
+        this.workflowMigrationService = workflowMigrationService;
         this.responseInfoFactory = responseInfoFactory;
     }
 
@@ -72,6 +71,12 @@ public class WorkflowController {
                 return new ResponseEntity<>(response,HttpStatus.OK);
         }
 
+        @RequestMapping(value="/process/_migrate", method = RequestMethod.POST)
+            public ResponseEntity<MigrationResponse> migrate (@Valid @RequestBody MigrationRequest migrationRequest) {
+            MigrationResponse response = workflowMigrationService.migrateToActiveDB(migrationRequest);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
     /**
      * Returns the count of records matching the given criteria
      * @param requestInfoWrapper
@@ -96,6 +101,7 @@ public class WorkflowController {
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
+
     /**
      * Returns the count of each status of records matching the given criteria
      * @param requestInfoWrapper
@@ -112,7 +118,7 @@ public class WorkflowController {
         List result = workflowService.statusCount(statusCountRequest.getRequestInfo(), statusCriteria);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
-    
+
     @RequestMapping(value="/process/_nearingslacount", method = RequestMethod.POST)
     public ResponseEntity<Integer> nearingSlaCount(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
                                          @Valid @ModelAttribute ProcessInstanceSearchCriteria criteria) {

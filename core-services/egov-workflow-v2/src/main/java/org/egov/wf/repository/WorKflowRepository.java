@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.egov.wf.util.WorkflowConstants.HISTORY_REPLACE_STRING;
+
 @Repository
 @Slf4j
 public class WorKflowRepository {
@@ -56,7 +58,38 @@ public class WorKflowRepository {
 
         String query = queryBuilder.getProcessInstanceSearchQueryById(ids, preparedStmtList);
         query = util.replaceSchemaPlaceholder(query, criteria.getTenantId());
-        log.debug("query for status search: "+query+" params: "+preparedStmtList);
+        if(criteria.getHistory())
+            query = query.replaceAll(HISTORY_REPLACE_STRING, "_history");
+        else
+            query = query.replaceAll(HISTORY_REPLACE_STRING, "_active");
+        log.debug("query for status search: " + query + " params: " + preparedStmtList);
+
+        return jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
+    }
+
+    public List<ProcessInstance> getProcessInstancesForMigration(ProcessInstanceSearchCriteria criteria){
+
+        List<String> ids;
+        List<Object> preparedStmtList = new ArrayList<>();
+
+        String query = queryBuilder.getProcessInstanceIds(criteria,preparedStmtList);
+        query = query.replaceAll(HISTORY_REPLACE_STRING, "");
+        query = util.replaceSchemaPlaceholder(query, criteria.getTenantId());
+
+        log.info(query);
+        log.info(preparedStmtList.toString());
+        ids = jdbcTemplate.query(query, preparedStmtList.toArray(), new SingleColumnRowMapper<>(String.class));
+
+        if(CollectionUtils.isEmpty(ids))
+            return new LinkedList<>();
+
+        preparedStmtList = new ArrayList<>();
+        query = queryBuilder.getProcessInstanceSearchQueryById(ids, preparedStmtList);
+        query = util.replaceSchemaPlaceholder(query, criteria.getTenantId());
+
+        query = query.replaceAll(HISTORY_REPLACE_STRING, "");
+
+        log.info("query for PI search: " + query + " params: " + preparedStmtList);
 
         return jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
     }
@@ -147,7 +180,14 @@ public class WorKflowRepository {
     private List<String> getProcessInstanceIds(ProcessInstanceSearchCriteria criteria) {
         List<Object> preparedStmtList = new ArrayList<>();
         String query = queryBuilder.getProcessInstanceIds(criteria,preparedStmtList);
+
+        if(criteria.getHistory()) {
+            query = query.replaceAll(HISTORY_REPLACE_STRING, "_history");
+        } else if(!criteria.getHistory()){
+            query = query.replaceAll(HISTORY_REPLACE_STRING, "_active");
+        }
         query = util.replaceSchemaPlaceholder(query, criteria.getTenantId());
+
         log.info(query);
         log.info(preparedStmtList.toString());
         return jdbcTemplate.query(query, preparedStmtList.toArray(), new SingleColumnRowMapper<>(String.class));

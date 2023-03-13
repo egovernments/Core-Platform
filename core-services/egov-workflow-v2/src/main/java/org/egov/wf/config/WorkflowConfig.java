@@ -62,6 +62,14 @@ public class WorkflowConfig {
     @Value("${persister.update.businessservice.wf.topic}")
     private String updateBusinessServiceTopic;
 
+    @Value("${persister.migrate.wf.processinstances.topic}")
+    private String persisterMigrationTopic;
+
+    @Value("${wf.migrate.topic}")
+    private String migrationTopic;
+
+    @Value("${persister.migrate.wf.audit.details.topic}")
+    private String jobAuditDetailsTopic;
 
 
     //MDMS

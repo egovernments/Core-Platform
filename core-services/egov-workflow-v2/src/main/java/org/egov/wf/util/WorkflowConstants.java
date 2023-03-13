@@ -54,4 +54,10 @@ public class WorkflowConstants {
 
     public static String SCHEMA_REPLACE_STRING = "{SCHEMA}";
 
+    public static String HISTORY_REPLACE_STRING = "\\{HISTORY\\}";
+
+    public static String HISTORY_REPLACEMENT_STRING = "_history";
+
+    public static String LIVE_REPLACEMENT_STRING = "_active";
+
 }
