@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.tarento.analytics.service.impl.ReportsQueryServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,8 @@ public class TarentoServiceImpl implements ClientService {
 	private MdmsApiMappings mdmsApiMappings;
 
 
+	@Autowired
+	private ReportsQueryServiceImpl reportsQueryService;
 	@Override
 	@Cacheable(value="versions", key="#request.hashKey")
 	public AggregateDto getAggregatedData(AggregateRequestDto request, List<RoleDto> roles) throws AINException, IOException {
@@ -147,25 +150,40 @@ public class TarentoServiceImpl implements ClientService {
 		int randIndexCount = 1;
 		for(JsonNode query : queries) {
 			String module = query.get(Constants.JsonPaths.MODULE).asText();
-			if(request.getModuleLevel().equals(Constants.Modules.HOME_REVENUE) || 
+			if(request.getModuleLevel().equals(Constants.Modules.HOME_REVENUE) ||
 					request.getModuleLevel().equals(Constants.Modules.HOME_SERVICES) ||
 					query.get(Constants.JsonPaths.MODULE).asText().equals(Constants.Modules.COMMON) ||
 					request.getModuleLevel().equals(module)) {
-				
+
 				String indexName = query.get(Constants.JsonPaths.INDEX_NAME).asText();
-				ObjectNode objectNode = queryService.getChartConfigurationQuery(request, query, indexName, interval);
+				ObjectNode objectNode = null;
+				if (chartNode.get(Constants.JsonPaths.CHART_TYPE).asText().equals(ChartType.REPORT.toString())) {
+					objectNode = reportsQueryService.getChartConfigurationReportQuery(request, query, chartNode, indexName, interval);
+				} else {
+					objectNode = queryService.getChartConfigurationQuery(request, query, indexName, interval);
+				}
+
 				try {
 					JsonNode aggrNode = restService.search(indexName,objectNode.toString());
-					if(nodes.has(indexName)) { 
+					if(nodes.has(indexName)) {
 						indexName = indexName + "_" + randIndexCount;
 						randIndexCount += 1;
 					}
-					nodes.set(indexName,aggrNode.get(Constants.JsonPaths.AGGREGATIONS));
+					// Check if response has aggregation
+					if (aggrNode.has(Constants.JsonPaths.AGGREGATIONS)) {
+						nodes.set(indexName,aggrNode.get(Constants.JsonPaths.AGGREGATIONS));
+						aggrObjectNode.set(Constants.JsonPaths.AGGREGATIONS, nodes);
+					}
+					else if (aggrNode.has(Constants.JsonPaths.HITS)) {
+						nodes.set(indexName,aggrNode.get(Constants.JsonPaths.HITS));
+						aggrObjectNode.set(Constants.JsonPaths.HITS, nodes);
+					}
 				}catch (Exception e) {
 					logger.error("Encountered an Exception while Executing the Query : " + e.getMessage());
 					throw new RuntimeException(e);
 				}
-				aggrObjectNode.set(Constants.JsonPaths.AGGREGATIONS, nodes);
+				// Move this to above because search result must have aggregation
+				// aggrObjectNode.set(Constants.JsonPaths.AGGREGATIONS, nodes);
 
 			}
 		}

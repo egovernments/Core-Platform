@@ -20,7 +20,8 @@ public class AggregateRequestDto {
 	private String interval;
 	private ObjectNode chartNode;
 	private ResponseRecorder responseRecorder;
-
+	private long limit;
+	private long offset;
 	@JsonIgnore
 	private int hashKey;
 	
@@ -118,7 +119,18 @@ public class AggregateRequestDto {
 	public void setHashKey(int hashKey) {
 		this.hashKey = hashKey;
 	}
-	
-	
+
+	public long getLimit() {
+		return limit;
+	}
+	public void setLimit(int limit) {
+		this.limit = limit;
+	}
+	public long getOffset() {
+		return offset;
+	}
+	public void setOffset(int offset) {
+		this.offset = offset;
+	}
 
 }

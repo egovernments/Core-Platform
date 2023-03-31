@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum ChartType {
 
-    XTABLE("xtable"), TABLE("table"), PERFORM("perform"), METRIC("metric"), PIE("pie"), LINE("line");
+    REPORT("report"), XTABLE("xtable"), TABLE("table"), PERFORM("perform"), METRIC("metric"), PIE("pie"), LINE("line");
     
     private String value;
 
