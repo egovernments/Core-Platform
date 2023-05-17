@@ -9,6 +9,8 @@ public class Plot {
     private String strValue;
     private String symbol;
 
+    public Plot(){
+    }
     public Plot(String name, Double value, String symbol) {
         this.name = name;
         this.value = value;

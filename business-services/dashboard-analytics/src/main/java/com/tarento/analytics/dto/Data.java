@@ -8,8 +8,10 @@ public class Data {
     private String headerName;
     private Object headerValue;
     private String headerSymbol;
-    private InsightsWidget insight; 
-    
+    private InsightsWidget insight;
+
+    public Data() {
+    }
     public InsightsWidget getInsight() {
 		return insight;
 	}

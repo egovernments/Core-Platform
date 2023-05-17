@@ -6,7 +6,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -16,11 +22,13 @@ import org.springframework.cache.annotation.EnableCaching;
 
 import com.tarento.analytics.constant.Constants;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 
 @SpringBootApplication
 @EnableCaching
+@ComponentScan(basePackages = {"com.tarento.analytics"})
 public class AnalyticApp {
 	 public static void main( String[] args ) {
 	        SpringApplication.run(AnalyticApp.class, args);
@@ -48,11 +56,15 @@ public class AnalyticApp {
 	        };
 	    }
 
-		@Bean
-		@Profile("!test")
-		public CacheManager cacheManager(){
-			return new SpringCache2kCacheManager().addCaches(b->b.name("versions").expireAfterWrite(cacheExpiry, TimeUnit.MINUTES)
-				.entryCapacity(cacheCapacity));
-		}
+	@Bean
+	public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+		RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
+				.entryTtl(Duration.ofMinutes(5)) // set TTL to 5 minutes
+				.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+
+		return RedisCacheManager.builder(redisConnectionFactory)
+				.cacheDefaults(cacheConfiguration)
+				.build();
+	}
 
 }

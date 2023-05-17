@@ -13,6 +13,7 @@ import com.tarento.analytics.handler.IResponseHandler;
 import com.tarento.analytics.handler.ResponseHandlerFactory;
 import com.tarento.analytics.service.QueryService;
 import com.tarento.analytics.service.impl.RestService;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class MdmsServiceImpl implements ClientService {
 
@@ -48,6 +50,7 @@ public class MdmsServiceImpl implements ClientService {
     @Override
     @Cacheable(value="versions", key="#request.hashKey")
     public AggregateDto getAggregatedData(AggregateRequestDto request, List<RoleDto> roles) throws AINException, IOException {
+        log.info("This data is cached from Database");
         // Read visualization Code
         String chartId = request.getVisualizationCode();
         logger.info("chartId >> "+chartId);

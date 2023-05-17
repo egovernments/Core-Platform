@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ import com.tarento.analytics.service.QueryService;
 import com.tarento.analytics.service.impl.RestService;
 import com.tarento.analytics.utils.ResponseRecorder;
 
-
+@Slf4j
 @Component
 public class TarentoServiceImpl implements ClientService {
 
@@ -68,6 +69,7 @@ public class TarentoServiceImpl implements ClientService {
 	@Override
 	@Cacheable(value="versions", key="#request.hashKey")
 	public AggregateDto getAggregatedData(AggregateRequestDto request, List<RoleDto> roles) throws AINException, IOException {
+		log.info("This data is cached from Database");
 		// Read visualization Code
 		String internalChartId = request.getVisualizationCode();
 		ObjectNode aggrObjectNode = JsonNodeFactory.instance.objectNode();
