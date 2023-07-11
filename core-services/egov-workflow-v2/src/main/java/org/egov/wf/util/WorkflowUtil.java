@@ -16,7 +16,6 @@ import org.egov.common.contract.request.User;
 import org.egov.common.utils.MultiStateInstanceUtil;
 import org.egov.tracer.model.CustomException;
 import org.egov.wf.config.WorkflowConfig;
-import org.egov.wf.repository.BusinessServiceRepository;
 import org.egov.wf.web.models.Action;
 import org.egov.wf.web.models.AuditDetails;
 import org.egov.wf.web.models.BusinessService;
@@ -27,24 +26,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 @Component
 public class WorkflowUtil {
 
-    private ObjectMapper mapper;
-
     private WorkflowConfig config;
 
-    private BusinessServiceRepository businessServiceRepository;
-
-
     @Autowired
-    public WorkflowUtil(ObjectMapper mapper, WorkflowConfig config, BusinessServiceRepository businessServiceRepository) {
-        this.mapper = mapper;
+    public WorkflowUtil( WorkflowConfig config) {
         this.config = config;
-        this.businessServiceRepository = businessServiceRepository;
     }
 
     @Autowired
@@ -254,9 +244,8 @@ public class WorkflowUtil {
      * @param criteria
      * @return
      */
-    public void enrichStatusesInSearchCriteria(RequestInfo requestInfo, ProcessInstanceSearchCriteria criteria){
+    public void enrichStatusesInSearchCriteria(RequestInfo requestInfo, ProcessInstanceSearchCriteria criteria, Map<String, Map<String,List<String>>> roleTenantAndStatusMapping){
 
-        Map<String, Map<String,List<String>>> roleTenantAndStatusMapping = businessServiceRepository.getRoleTenantAndStatusMapping(criteria.getTenantId());
         Map<String,List<String>> roleToTenantIdMap = getRoleToTenantId(requestInfo);
 
         List<String> tenantSpecificStatuses = new LinkedList<>();
