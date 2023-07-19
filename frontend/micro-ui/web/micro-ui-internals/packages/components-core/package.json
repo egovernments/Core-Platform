@@ -1,5 +1,5 @@
 {
-  "name": "@egovernments/digit-ui-svg-components",
+  "name": "@egovernments/digit-ui-components-core",
   "version": "0.0.1",
   "main": "dist/index.js",
   "module": "dist/index.modern.js",
@@ -41,6 +41,9 @@
     "react-scripts": "^4.0.1",
     "react-dom": "17.0.2"
   },
+  "dependencies": {
+    "@egovernments/digit-ui-svg-components":"0.0.2"
+  },
   "files": [
     "dist"
   ],
@@ -55,5 +58,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "keywords": ["digit","core","components","dpg"]
 }
