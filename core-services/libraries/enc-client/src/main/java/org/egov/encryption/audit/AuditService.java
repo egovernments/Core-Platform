@@ -8,7 +8,7 @@ import org.egov.encryption.config.DecryptionPolicyConfiguration;
 import org.egov.encryption.config.EncProperties;
 import org.egov.encryption.models.AuditObject;
 import org.egov.encryption.models.UniqueIdentifier;
-import org.egov.encryption.producer.Producer;
+import org.egov.encryption.producer.EncClientProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ import java.util.UUID;
 public class AuditService {
 
     @Autowired
-    private Producer producer;
+    private EncClientProducer producer;
     @Autowired
     private EncProperties encProperties;
     @Autowired
