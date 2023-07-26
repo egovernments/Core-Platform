@@ -7,6 +7,7 @@ import {
   getValue
 } from "./commons";
 import logger from "../config/logger";
+import envVariables from "../EnvironmentVariables";
 /**
  *
  * @param {*} key -name of the key used to identify module configs. Provided request URL
@@ -167,9 +168,12 @@ export const externalAPIMapping = async function (
       accept: "application/json, text/plain"
     };*/
 
+    header.TENANTID = envVariables.STATE_LEVEL_TENANT_ID;
     let headerConfig = {
       headers: header
     };
+
+    // console.log("Header-------->     "+JSON.stringify(headerConfig));
 
     let resPromise;
     if (externalAPIArray[i].requesttype == "POST") {
@@ -185,10 +189,13 @@ export const externalAPIMapping = async function (
         }
       );
     }
+    console.log("EXTERNAL API --> "+externalAPIArray[i].uri + "?" + externalAPIArray[i].queryParams);
+    console.log("resPromise-------->     "+JSON.stringify(resPromise));
     responsePromises.push(resPromise)
   }
 
   try {
+    console.log("responsePromises -------->     "+JSON.stringify(responsePromises));
     responses = await Promise.all(responsePromises)
   } catch (error) {
     logger.error(error.stack || error);
