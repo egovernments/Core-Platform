@@ -125,7 +125,7 @@ public class ElasticSearchQueryBuilder {
                 if (criteria == null) {
                     return null;
                 }
-                criteria.setModuleSearchCriteria(encryptionService.encryptJson(criteria.getModuleSearchCriteria(), "InboxWnS", criteria.getTenantId(), HashMap.class));
+                criteria.setModuleSearchCriteria(encryptionService.encryptJson(criteria.getModuleSearchCriteria(), "InboxWnS", config.getStateLevelTenantId(), HashMap.class));
                 if (criteria == null) {
                     throw new CustomException("ENCRYPTION_NULL_ERROR", "Null object found on performing encryption");
                 }
