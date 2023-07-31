@@ -38,7 +38,7 @@ public interface IResponseHandler {
 	// Table Chart Keys
 	public static final String SERIAL_NUMBER = "S.N.";
 	public static final String TABLE_TEXT = "text" ; 
-	public static final String TABLE_KEY = "Key"; 
+	public static final String TABLE_KEY = "Key";
 	
 
     // TODO remove the specific column names.
@@ -70,7 +70,9 @@ public interface IResponseHandler {
 	public static String BUCKETS = "buckets";
 	public static String KEY = "key";
 	public static String VALUE = "value";
-	
+	public final String NAME = "name";
+	public final String LABEL = "label";
+	public final String SYMBOL = "symbol";
 	public final String PERCENTAGE = "percentage";
     public final String DOC_COUNT = "doc_count"; 
     
