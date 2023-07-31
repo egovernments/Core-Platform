@@ -417,6 +417,7 @@ export const FormComposer = (props) => {
               />
             )}
             name={config.key}
+            rules={!disableFormValidation ? { required: isMandatory, ...populators.validation } : {}}
             control={control}
           />
         );
@@ -830,9 +831,7 @@ export const FormComposer = (props) => {
   );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} onKeyDown={(e) => checkKeyDown(e)} id={props.formId} className={props.className}>        
-              {props?.headerLabel&&<Header className="digit-form-composer-header">{ t(props.headerLabel)}</Header>}
-
+    <form onSubmit={handleSubmit(onSubmit)} onKeyDown={(e) => checkKeyDown(e)} id={props.formId} className={props.className}>
       {props?.showMultipleCardsWithoutNavs ? (
           props?.config?.map((section, index, array) => {
             return !section.navLink && (

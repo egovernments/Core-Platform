@@ -98,7 +98,7 @@ const Login = ({ config: propsConfig, t, isDisabled }) => {
     name: Digit.Utils.locale.getTransformedLocale(`TENANT_TENANTS_${Digit.ULBService.getStateId()}`),
   };
   const [userId, password, city] = propsConfig.inputs;
-  const config = [
+  let config = [
     {
       body: [
         {
@@ -139,6 +139,9 @@ const Login = ({ config: propsConfig, t, isDisabled }) => {
       ],
     },
   ];
+
+  config = propsConfig?.inputs ? [{body : propsConfig?.inputs}] : config;
+
   const { mode } = Digit.Hooks.useQueryParams();
   if (mode === "admin" && config?.[0]?.body?.[2]?.disable == false && config?.[0]?.body?.[2]?.populators?.defaultValue == undefined) {
     config[0].body[2].disable = true;
