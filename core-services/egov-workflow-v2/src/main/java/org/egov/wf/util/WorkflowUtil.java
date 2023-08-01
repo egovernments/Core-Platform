@@ -38,7 +38,7 @@ public class WorkflowUtil {
     }
 
     @Autowired
-    private MultiStateInstanceUtil multiStateInstanceUtil;
+    private MultiStateInstanceUtil centralInstanceUtil;
 
 
 
@@ -451,10 +451,10 @@ public class WorkflowUtil {
     /**
      *  Checks if the tenantId is valid to take action
      * @param roleTenantId The tenantId of the role
-     * @param applicationTeanantId The tenantId of the application
+     * @param applicationTenantId The tenantId of the application
      * @return
      */
-    private Boolean isTenantIdValid(String roleTenantId, String applicationTeanantId){
+    private Boolean isTenantIdValid(String roleTenantId, String applicationTenantId){
 
         if(roleTenantId == null)
             return false;
@@ -462,11 +462,12 @@ public class WorkflowUtil {
         Boolean isTenantIdValid = false;
 
         // If the tenantId are same role can take action
-        if(roleTenantId.equalsIgnoreCase(applicationTeanantId))
+        if(roleTenantId.equalsIgnoreCase(applicationTenantId))
             isTenantIdValid = true;
 
         // If the role tenantId is statelevel it can take action
-        else if(roleTenantId.equalsIgnoreCase(applicationTeanantId.split("\\.")[0]))
+
+        else if(roleTenantId.equalsIgnoreCase(centralInstanceUtil.getStateLevelTenant(applicationTenantId)))
             isTenantIdValid = true;
 
         return isTenantIdValid;
@@ -475,7 +476,7 @@ public class WorkflowUtil {
 
 
     private Boolean isTenantStateLevel(String tenantId){
-        return multiStateInstanceUtil.isTenantIdStateLevel(tenantId);
+        return centralInstanceUtil.isTenantIdStateLevel(tenantId);
     }
 
 
@@ -492,9 +493,9 @@ public class WorkflowUtil {
 
         String finalQuery = null;
         if (config.getIsEnvironmentCentralInstance()) {
-            String multiInstanceSchema = multiStateInstanceUtil.getStateLevelTenant(tenantId);
+            String multiInstanceSchema = centralInstanceUtil.getStateLevelTenant(tenantId);
             try {
-                finalQuery = multiStateInstanceUtil.replaceSchemaPlaceholder(query, multiInstanceSchema);
+                finalQuery = centralInstanceUtil.replaceSchemaPlaceholder(query, multiInstanceSchema);
             }catch (Exception e){
                 throw new CustomException("EG_WF_SEARCH_ERR", "Invalid tenantId provided as part of search");
             }
