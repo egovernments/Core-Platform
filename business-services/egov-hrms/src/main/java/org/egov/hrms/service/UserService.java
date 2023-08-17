@@ -54,6 +54,7 @@ import org.egov.hrms.utils.HRMSConstants;
 import org.egov.hrms.web.contract.UserRequest;
 import org.egov.hrms.web.contract.UserResponse;
 import org.egov.tracer.model.CustomException;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -92,6 +93,11 @@ public class UserService {
 
 	private String internalMicroserviceRoleUuid = null;
 
+	@Autowired
+	private MultiStateInstanceUtil multiStateInstanceUtil;
+
+	public static final String TENANTID_MDC_STRING = "TENANTID";
+
 	@PostConstruct
 	void initalizeSystemuser(){
 		RequestInfo requestInfo = new RequestInfo();
@@ -99,8 +105,11 @@ public class UserService {
 		uri.append(propertiesManager.getUserHost()).append(propertiesManager.getUserSearchEndpoint()); // URL for user search call
 		Map<String, Object> userSearchRequest = new HashMap<>();
 		userSearchRequest.put("RequestInfo", requestInfo);
-		userSearchRequest.put("tenantId", propertiesManager.getParentLevelTenantId());
+		userSearchRequest.put("tenantId", propertiesManager.getStateLevelTenantId());
 		userSearchRequest.put("roleCodes", Collections.singletonList(INTERNALMICROSERVICEROLE_CODE));
+		if(multiStateInstanceUtil.getIsEnvironmentCentralInstance()){
+			MDC.put(TENANTID_MDC_STRING, propertiesManager.getStateLevelTenantId());
+		}
 		try {
 			LinkedHashMap<String, Object> responseMap = (LinkedHashMap<String, Object>) restCallRepository.fetchResult(uri, userSearchRequest);
 			List<LinkedHashMap<String, Object>> users = (List<LinkedHashMap<String, Object>>) responseMap.get("user");
@@ -118,10 +127,10 @@ public class UserService {
 		//Creating role with INTERNAL_MICROSERVICE_ROLE
 		Role role = Role.builder()
 				.name(INTERNALMICROSERVICEROLE_NAME).code(INTERNALMICROSERVICEROLE_CODE)
-				.tenantId(propertiesManager.getParentLevelTenantId()).build();
+				.tenantId(propertiesManager.getStateLevelTenantId()).build();
 		User user = User.builder().userName(INTERNALMICROSERVICEUSER_USERNAME)
 				.name(INTERNALMICROSERVICEUSER_NAME).mobileNumber(INTERNALMICROSERVICEUSER_MOBILENO)
-				.type(INTERNALMICROSERVICEUSER_TYPE).tenantId(propertiesManager.getParentLevelTenantId())
+				.type(INTERNALMICROSERVICEUSER_TYPE).tenantId(propertiesManager.getStateLevelTenantId())
 				.roles(Collections.singletonList(role)).id(0L).build();
 
 		userCreateRequest.put("RequestInfo", requestInfo);
