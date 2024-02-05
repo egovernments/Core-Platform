@@ -47,10 +47,12 @@ import org.springframework.context.annotation.Configuration;
 
 import lombok.Getter;
 import lombok.ToString;
+import org.springframework.stereotype.Component;
 
 @Configuration
 @Getter
 @ToString
+@Component
 public class ApplicationProperties {
 
 	
@@ -200,6 +202,17 @@ public class ApplicationProperties {
     
     @Value("${is.environment.central.instance}")
     private Boolean isEnvironmentCentralInstance;
+
+    // Pagination
+
+	@Value("${search.default.offset}")
+	private Integer defaultOffset;
+
+	@Value("${search.default.limit}")
+	private Integer defaultLimit;
+
+	@Value("${search.max.limit}")
+	private Integer maxLimit;
 
     
 }

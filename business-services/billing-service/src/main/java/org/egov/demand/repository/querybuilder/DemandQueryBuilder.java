@@ -46,12 +46,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.egov.common.utils.MultiStateInstanceUtil;
+import org.egov.demand.config.ApplicationProperties;
 import org.egov.demand.model.DemandCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.ObjectUtils;
 
 @Slf4j
 @Component
@@ -59,6 +61,9 @@ public class DemandQueryBuilder {
 	
 	@Autowired
 	private MultiStateInstanceUtil centralInstaceUtil;
+
+	@Autowired
+	private ApplicationProperties applicationProperties;
 	
 
 	public static final String PAYMENT_BACKUPDATE_AUDIT_INSERT_QUERY = "INSERT INTO {schema}.egbs_payment_backupdate_audit (paymentid, isbackupdatesuccess, isreceiptcancellation, errorMessage)"
@@ -81,6 +86,16 @@ public class DemandQueryBuilder {
 			+ "dmdl.createdtime AS dlcreatedtime,dmdl.lastModifiedtime AS dllastModifiedtime,"
 			+ "dmdl.tenantid AS dltenantid,dmdl.additionaldetails as detailadditionaldetails " + "FROM {schema}.egbs_demand_v1 dmd "
 			+ "INNER JOIN {schema}.egbs_demanddetail_v1 dmdl ON dmd.id=dmdl.demandid " + "AND dmd.tenantid=dmdl.tenantid WHERE ";
+
+	public static final String DEMAND_IDS_QUERY = "SELECT dmd.id AS did,dmd.consumercode AS dconsumercode,"
+			+ "dmd.consumertype AS dconsumertype,dmd.businessservice AS dbusinessservice,dmd.payer,"
+			+ "dmd.billexpirytime AS dbillexpirytime, dmd.fixedBillExpiryDate as dfixedBillExpiryDate, "
+			+ "dmd.taxperiodfrom AS dtaxperiodfrom,dmd.taxperiodto AS dtaxperiodto,"
+			+ "dmd.minimumamountpayable AS dminimumamountpayable,dmd.createdby AS dcreatedby,"
+			+ "dmd.lastmodifiedby AS dlastmodifiedby,dmd.createdtime AS dcreatedtime,"
+			+ "dmd.lastmodifiedtime AS dlastmodifiedtime,dmd.tenantid AS dtenantid,dmd.status,"
+			+ "dmd.additionaldetails as demandadditionaldetails,dmd.ispaymentcompleted as ispaymentcompleted "
+			+ "FROM {schema}.egbs_demand_v1 dmd WHERE ";
 
 	public static final String BASE_DEMAND_DETAIL_QUERY = "SELECT "
 			+ "demanddetail.id AS dlid,demanddetail.demandid AS dldemandid,demanddetail.taxheadcode AS dltaxheadcode,"
@@ -162,62 +177,9 @@ public class DemandQueryBuilder {
 
 		StringBuilder demandQuery = new StringBuilder(BASE_DEMAND_QUERY);
 
-		String tenantId = demandCriteria.getTenantId();
-		
-		if (centralInstaceUtil.isTenantIdStateLevel(tenantId)) {
-			demandQuery.append(" dmd.tenantid LIKE ? ");
-			preparedStatementValues.add(demandCriteria.getTenantId() + '%');
-		} else {
-			demandQuery.append(" dmd.tenantid = ? ");
-			preparedStatementValues.add(demandCriteria.getTenantId());
-		}
-		
-		if (demandCriteria.getStatus() != null) {
-
-			addAndClause(demandQuery);
-			demandQuery.append("dmd.status=?");
-			preparedStatementValues.add(demandCriteria.getStatus());
-		}
-		
-		if (demandCriteria.getDemandId() != null && !demandCriteria.getDemandId().isEmpty()) {
-			addAndClause(demandQuery);
+		if (!CollectionUtils.isEmpty(demandCriteria.getDemandId())) {
 			demandQuery.append("dmd.id IN (" + getIdQueryForStrings(demandCriteria.getDemandId()) + ")");
 			addToPreparedStatement(preparedStatementValues, demandCriteria.getDemandId());
-		}
-		if (!CollectionUtils.isEmpty(demandCriteria.getPayer())) {
-			addAndClause(demandQuery);
-			demandQuery.append("dmd.payer IN (" + getIdQueryForStrings(demandCriteria.getPayer()) + ")");
-			addToPreparedStatement(preparedStatementValues, demandCriteria.getPayer());
-		}
-		if (demandCriteria.getBusinessService() != null) {
-			addAndClause(demandQuery);
-			demandQuery.append("dmd.businessservice=?");
-			preparedStatementValues.add(demandCriteria.getBusinessService());
-		}
-		
-		if(demandCriteria.getIsPaymentCompleted() != null){
-			addAndClause(demandQuery);
-			demandQuery.append("dmd.ispaymentcompleted = ?");
-			preparedStatementValues.add(demandCriteria.getIsPaymentCompleted());
-		}
-		
-		if (demandCriteria.getPeriodFrom() != null) {
-			addAndClause(demandQuery);
-			demandQuery.append("dmd.taxPeriodFrom >= ?");
-			preparedStatementValues.add(demandCriteria.getPeriodFrom());
-		}
-		
-		if(demandCriteria.getPeriodTo() != null){
-			addAndClause(demandQuery);
-			demandQuery.append("dmd.taxPeriodTo <= ?");
-			preparedStatementValues.add(demandCriteria.getPeriodTo());
-		}
-		
-		if (demandCriteria.getConsumerCode() != null && !demandCriteria.getConsumerCode().isEmpty()) {
-			addAndClause(demandQuery);
-			demandQuery.append("dmd.consumercode IN ("
-			+ getIdQueryForStrings(demandCriteria.getConsumerCode()) + ")");
-			addToPreparedStatement(preparedStatementValues, demandCriteria.getConsumerCode());
 		}
 
 		addOrderByClause(demandQuery, DEMAND_QUERY_ORDER_BY_CLAUSE);
@@ -236,6 +198,29 @@ public class DemandQueryBuilder {
 //		preparedStatementValues.add(500);
 //		demandQueryBuilder.append(" OFFSET ?");
 //		preparedStatementValues.add(0);
+	}
+
+	private void addPagingClause(StringBuilder demandQueryBuilder, DemandCriteria criteria, List<Object> preparedStatementValues) {
+
+		// Add clause for offset
+		demandQueryBuilder.append(" OFFSET ?");
+		if(ObjectUtils.isEmpty(criteria.getOffset())) {
+			preparedStatementValues.add(applicationProperties.getDefaultOffset());
+		} else{
+			preparedStatementValues.add(criteria.getOffset());
+		}
+
+		// Add clause for limit
+		demandQueryBuilder.append(" LIMIT ?");
+		if(ObjectUtils.isEmpty(criteria.getLimit())){
+			preparedStatementValues.add(applicationProperties.getDefaultLimit());
+		}else {
+			if (criteria.getLimit() > applicationProperties.getMaxLimit()) {
+				preparedStatementValues.add(applicationProperties.getMaxLimit());
+			} else {
+				preparedStatementValues.add(criteria.getLimit());
+			}
+		}
 	}
 
 	private static boolean addAndClause(StringBuilder queryString) {
@@ -257,5 +242,74 @@ public class DemandQueryBuilder {
 	private void addToPreparedStatement(List<Object> preparedStmtList, Collection<String> ids)
 	{
 		ids.forEach(id ->{ preparedStmtList.add(id);});
+	}
+
+	public String getDemandIdsQuery(DemandCriteria demandCriteria, List<Object> preparedStatementValues) {
+		String finalIdsQuery = "SELECT did FROM ( {INTERNAL_QUERY} ) AS did";
+		StringBuilder demandIdsQuery = new StringBuilder(DEMAND_IDS_QUERY);
+
+		String tenantId = demandCriteria.getTenantId();
+
+		if (centralInstaceUtil.isTenantIdStateLevel(tenantId)) {
+			demandIdsQuery.append(" dmd.tenantid LIKE ? ");
+			preparedStatementValues.add(demandCriteria.getTenantId() + '%');
+		} else {
+			demandIdsQuery.append(" dmd.tenantid = ? ");
+			preparedStatementValues.add(demandCriteria.getTenantId());
+		}
+
+		if (demandCriteria.getStatus() != null) {
+
+			addAndClause(demandIdsQuery);
+			demandIdsQuery.append("dmd.status=?");
+			preparedStatementValues.add(demandCriteria.getStatus());
+		}
+
+		if (demandCriteria.getDemandId() != null && !demandCriteria.getDemandId().isEmpty()) {
+			addAndClause(demandIdsQuery);
+			demandIdsQuery.append("dmd.id IN (" + getIdQueryForStrings(demandCriteria.getDemandId()) + ")");
+			addToPreparedStatement(preparedStatementValues, demandCriteria.getDemandId());
+		}
+		if (!CollectionUtils.isEmpty(demandCriteria.getPayer())) {
+			addAndClause(demandIdsQuery);
+			demandIdsQuery.append("dmd.payer IN (" + getIdQueryForStrings(demandCriteria.getPayer()) + ")");
+			addToPreparedStatement(preparedStatementValues, demandCriteria.getPayer());
+		}
+		if (demandCriteria.getBusinessService() != null) {
+			addAndClause(demandIdsQuery);
+			demandIdsQuery.append("dmd.businessservice=?");
+			preparedStatementValues.add(demandCriteria.getBusinessService());
+		}
+
+		if(demandCriteria.getIsPaymentCompleted() != null){
+			addAndClause(demandIdsQuery);
+			demandIdsQuery.append("dmd.ispaymentcompleted = ?");
+			preparedStatementValues.add(demandCriteria.getIsPaymentCompleted());
+		}
+
+		if (demandCriteria.getPeriodFrom() != null) {
+			addAndClause(demandIdsQuery);
+			demandIdsQuery.append("dmd.taxPeriodFrom >= ?");
+			preparedStatementValues.add(demandCriteria.getPeriodFrom());
+		}
+
+		if(demandCriteria.getPeriodTo() != null){
+			addAndClause(demandIdsQuery);
+			demandIdsQuery.append("dmd.taxPeriodTo <= ?");
+			preparedStatementValues.add(demandCriteria.getPeriodTo());
+		}
+
+		if (demandCriteria.getConsumerCode() != null && !demandCriteria.getConsumerCode().isEmpty()) {
+			addAndClause(demandIdsQuery);
+			demandIdsQuery.append("dmd.consumercode IN ("
+					+ getIdQueryForStrings(demandCriteria.getConsumerCode()) + ")");
+			addToPreparedStatement(preparedStatementValues, demandCriteria.getConsumerCode());
+		}
+
+		addOrderByClause(demandIdsQuery, DEMAND_QUERY_ORDER_BY_CLAUSE);
+		addPagingClause(demandIdsQuery, demandCriteria, preparedStatementValues);
+
+		return finalIdsQuery.replace("{INTERNAL_QUERY}", demandIdsQuery);
+
 	}
 }
